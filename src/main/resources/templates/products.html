@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,16 +12,51 @@
     </style>
 </head>
 <body>
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
 
 <main class="py-4">
     <div class="container">
-        <h2><i class="bi bi-grid"></i> Product Catalog</h2>
-        <hr>
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> Product listing will be populated once CRUD is implemented (Day 3).
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2><i class="bi bi-grid"></i> Product Catalog</h2>
+            <a class="btn btn-outline-primary" sec:authorize="hasRole('SELLER')" th:href="@{/seller/products}">Manage My Products</a>
         </div>
-        <p class="text-muted">This page will display all active products from the database.</p>
+        <hr>
+
+        <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+        <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+        <div class="table-responsive" th:if="${products != null and !products.isEmpty()}">
+            <table class="table table-striped align-middle">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Seller</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.name}"></td>
+                    <td th:text="${product.sku}"></td>
+                    <td th:text="${product.sellerName}"></td>
+                    <td th:text="${#numbers.formatDecimal(product.price, 1, 2)}"></td>
+                    <td th:text="${product.quantity}"></td>
+                    <td>
+                        <a class="btn btn-sm btn-primary" sec:authorize="hasRole('BUYER')" th:href="@{/buyer/orders/new}">Order Now</a>
+                        <a class="btn btn-sm btn-outline-secondary" sec:authorize="isAnonymous()" th:href="@{/login}">Login to Order</a>
+                        <a class="btn btn-sm btn-outline-dark" sec:authorize="hasRole('SELLER')" th:href="@{/seller/products}">My Products</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-info" th:if="${products == null or products.isEmpty()}">
+            No active products are available right now.
+        </div>
     </div>
 </main>
 

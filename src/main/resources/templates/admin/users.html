@@ -12,16 +12,63 @@
     </style>
 </head>
 <body>
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
 
 <main class="py-4">
     <div class="container">
-        <h2><i class="bi bi-people"></i> Admin — User Management</h2>
+        <h2><i class="bi bi-people"></i> Admin - User Management</h2>
         <hr>
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> User listing will be populated once admin features are implemented (Day 3).
+
+        <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+        <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+        <div class="table-responsive" th:if="${users != null and !users.isEmpty()}">
+            <table class="table table-striped align-middle">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Enabled</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.id}"></td>
+                    <td th:text="${user.name}"></td>
+                    <td th:text="${user.email}"></td>
+                    <td>
+                        <form class="d-flex gap-2" th:action="@{'/admin/users/' + ${user.id} + '/role'}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <select name="roleInt" class="form-select form-select-sm">
+                                <option value="0" th:selected="${user.roleInt == 0}">BUYER</option>
+                                <option value="1" th:selected="${user.roleInt == 1}">SELLER</option>
+                                <option value="2" th:selected="${user.roleInt == 2}">ADMIN</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-primary" type="submit">Save</button>
+                        </form>
+                    </td>
+                    <td>
+                        <span class="badge bg-success" th:if="${user.enabled}">Enabled</span>
+                        <span class="badge bg-danger" th:unless="${user.enabled}">Disabled</span>
+                    </td>
+                    <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td>
+                        <form th:if="${user.id != currentAdminId}" th:action="@{'/admin/users/' + ${user.id} + '/toggle'}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button type="submit" class="btn btn-sm" th:classappend="${user.enabled} ? 'btn-outline-danger' : 'btn-outline-success'"
+                                    th:text="${user.enabled} ? 'Disable' : 'Enable'"></button>
+                        </form>
+                        <span class="text-muted small" th:if="${user.id == currentAdminId}">Cannot toggle self</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
-        <p class="text-muted">This page will display all registered users with their roles and status.</p>
+        <div class="alert alert-info" th:if="${users == null or users.isEmpty()}">No users found.</div>
     </div>
 </main>
 

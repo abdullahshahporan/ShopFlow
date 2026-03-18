@@ -12,16 +12,47 @@
     </style>
 </head>
 <body>
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
 
 <main class="py-4">
     <div class="container">
-        <h2><i class="bi bi-bag-check"></i> Buyer — My Orders</h2>
-        <hr>
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> Order history will be displayed once order functionality is implemented (Day 3).
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2><i class="bi bi-bag-check"></i> Buyer - My Orders</h2>
+            <a class="btn btn-primary" th:href="@{/buyer/orders/new}"><i class="bi bi-plus-circle"></i> Place New Order</a>
         </div>
-        <p class="text-muted">This page will show the buyer's order history with status and details.</p>
+        <hr>
+
+        <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+        <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+        <div class="table-responsive" th:if="${orders != null and !orders.isEmpty()}">
+            <table class="table table-striped align-middle">
+                <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Item Count</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.id}"></td>
+                    <td th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:text="${order.status}"></td>
+                    <td th:text="${#numbers.formatDecimal(order.total, 1, 2)}"></td>
+                    <td th:text="${order.items.size()}"></td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{'/buyer/orders/' + ${order.id}}">View Details</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-info" th:if="${orders == null or orders.isEmpty()}">You have not placed any orders yet.</div>
     </div>
 </main>
 
