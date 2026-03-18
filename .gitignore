@@ -31,3 +31,27 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Documentation Files ###
+*.md
+*.txt
+*.pdf
+
+### Script Files ###
+*.ps1
+*.bat
+*.sh
+
+### Environment & Configuration ###
+.env
+.env.local
+docker-compose.override.yml
+
+### Temporary Files ###
+*.tmp
+*.temp
+*.log
+*.swp
+*.swo
+~*
+
