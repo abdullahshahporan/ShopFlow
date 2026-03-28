@@ -1,31 +1,105 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products | Store Manager</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <style>
-        body { min-height: 100vh; display: flex; flex-direction: column; }
-        main { flex: 1; }
-    </style>
+    <title>Browse Products | ShopFlow</title>
+    <th:block th:replace="~{fragments/layout :: head}"></th:block>
 </head>
 <body>
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
-
-<main class="py-4">
-    <div class="container">
-        <h2><i class="bi bi-grid"></i> Product Catalog</h2>
-        <hr>
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> Product listing will be populated once CRUD is implemented (Day 3).
+    <div class="sidebar-layout" sec:authorize="isAuthenticated()">
+        <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
+        <div class="sidebar-content">
+            <div th:replace="~{fragments/topbar :: topbar('Product Catalog')}"></div>
+            <main>
+                <div th:replace="::flash-messages"></div>
+                <div th:replace="::product-grid"></div>
+            </main>
+            <footer th:replace="~{fragments/layout :: footer}"></footer>
         </div>
-        <p class="text-muted">This page will display all active products from the database.</p>
     </div>
-</main>
 
-<footer th:replace="~{fragments/layout :: footer}"></footer>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="public-layout" sec:authorize="isAnonymous()">
+        <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+        <main style="padding: 40px 20px;">
+            <div class="container">
+                <div th:replace="::flash-messages"></div>
+                <div th:replace="::product-grid"></div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+
+    <!-- Flash Messages Fragment -->
+    <th:block th:fragment="flash-messages">
+        <div th:if="${successMessage}" class="alert-modern alert-success-modern">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="alert-modern alert-danger-modern">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${errorMessage}"></span>
+        </div>
+    </th:block>
+
+    <!-- Product Grid Fragment -->
+    <th:block th:fragment="product-grid">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+            <h2>Product Catalog</h2>
+            <a sec:authorize="hasRole('SELLER')" th:href="@{/seller/products}" class="btn btn-primary btn-sm">
+                <i class="bi bi-box-seam"></i> My Products
+            </a>
+        </div>
+
+        <div th:if="${products != null and !products.isEmpty()}" class="product-grid">
+            <div th:each="product : ${products}" class="product-card">
+                <div class="product-image">
+                    <i class="bi bi-box" style="font-size: 40px;"></i>
+                </div>
+                <div class="product-name" th:text="${product.name}"></div>
+                <div class="product-sku">SKU: <span th:text="${product.sku}"></span></div>
+                <div class="product-price" th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}"></div>
+                
+                <div th:if="${product.quantity > 0}" class="product-stock">
+                    <span th:classappend="${product.quantity > 10} ? 'badge-success' : ${product.quantity > 0} ? 'badge-warning' : 'badge-danger'"
+                          style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;"
+                          th:text="'Stock: ' + ${product.quantity}"></span>
+                </div>
+                <div th:if="${product.quantity == 0}" class="product-stock">
+                    <span class="badge-danger" style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">Out of Stock</span>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <sec:authorize access="hasRole('BUYER')">
+                        <a th:href="@{/buyer/orders/new}" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-bag-check"></i> Order Now
+                        </a>
+                    </sec:authorize>
+                    <sec:authorize access="isAnonymous()">
+                        <a th:href="@{/login}" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="bi bi-box-arrow-in-right"></i> Sign In
+                        </a>
+                    </sec:authorize>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${products == null or products.isEmpty()}" class="empty-state">
+            <i class="bi bi-box-seam"></i>
+            <h5>No Products Available</h5>
+            <p class="text-muted">There are no active products available at the moment. Check back later!</p>
+        </div>
+    </th:block>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss alerts
+        document.querySelectorAll('.alert-modern').forEach(alert => {
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }, 4000);
+        });
+    </script>
 </body>
 </html>

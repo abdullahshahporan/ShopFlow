@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Detail | ShopFlow</title>
+    <th:block th:replace="~{fragments/layout :: head}"></th:block>
+</head>
+<body class="sidebar-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
+    <div class="sidebar-content">
+        <div th:replace="~{fragments/topbar :: topbar('Order Details')}"></div>
+        <main>
+            <!-- Order Summary Card -->
+            <div class="card" style="margin-bottom: 24px;">
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                        <div>
+                            <small class="text-muted">Order ID</small>
+                            <div style="font-size: 18px; font-weight: 700; color: var(--primary);">#<span th:text="${order.id}"></span></div>
+                        </div>
+                        <div>
+                            <small class="text-muted">Date</small>
+                            <div style="font-size: 15px; font-weight: 600;" th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}"></div>
+                        </div>
+                        <div>
+                            <small class="text-muted">Status</small>
+                            <div><span class="badge badge-warning" style="background: #FEF3C7; color: #92400E;" th:text="${order.status}"></span></div>
+                        </div>
+                        <div>
+                            <small class="text-muted">Total</small>
+                            <div style="font-size: 20px; font-weight: 700;" th:text="'$' + ${#numbers.formatDecimal(order.total, 1, 2)}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Table -->
+            <div class="card">
+                <div class="card-body">
+                    <h3 style="margin-bottom: 24px;">Order Items</h3>
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Subtotal</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="item : ${order.items}">
+                                <td><strong th:text="${item.productName}"></strong></td>
+                                <td th:text="${item.qty} + ' units'"></td>
+                                <td th:text="'$' + ${#numbers.formatDecimal(item.unitPrice, 1, 2)}"></td>
+                                <td><strong th:text="'$' + ${#numbers.formatDecimal(item.subtotal, 1, 2)}"></strong></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Total Summary -->
+                    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); text-align: right;">
+                        <div style="margin-bottom: 12px; color: var(--text-muted);">Subtotal</div>
+                        <div style="margin-bottom: 8px; color: var(--text-muted);"><i class="bi bi-dash"></i></div>
+                        <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);">Total: <span th:text="'$' + ${#numbers.formatDecimal(order.total, 1, 2)}"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div style="margin-top: 24px;">
+                <a th:href="@{/buyer/orders}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Orders
+                </a>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

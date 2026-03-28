@@ -2,6 +2,7 @@ package com.shahporan.demo.service;
 
 import com.shahporan.demo.entity.User;
 import com.shahporan.demo.repository.UserRepository;
+import com.shahporan.demo.security.CustomUserDetails;
 import com.shahporan.demo.security.RoleMappings;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,11 +24,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmailIgnoreCase(email.trim())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
-                .password(user.getPasswordHash())
-                .authorities(new SimpleGrantedAuthority(RoleMappings.toAuthority(user.getRoleInt())))
-                .disabled(!Boolean.TRUE.equals(user.getEnabled()))
+        return CustomUserDetails.builder()
+            .id(user.getId())
+            .username(user.getEmail())
+            .password(user.getPasswordHash())
+            .authorities(java.util.List.of(new SimpleGrantedAuthority(RoleMappings.toAuthority(user.getRoleInt()))))
+            .enabled(Boolean.TRUE.equals(user.getEnabled()))
                 .build();
     }
 }
