@@ -3,11 +3,11 @@ package com.shahporan.demo.service;
 import com.shahporan.demo.dto.ProductRequestDto;
 import com.shahporan.demo.dto.ProductResponseDto;
 import com.shahporan.demo.entity.Product;
-import com.shahporan.demo.entity.User;
+import com.shahporan.demo.entity.Seller;
 import com.shahporan.demo.exception.BadRequestException;
 import com.shahporan.demo.exception.ResourceNotFoundException;
 import com.shahporan.demo.repository.ProductRepository;
-import com.shahporan.demo.repository.UserRepository;
+import com.shahporan.demo.repository.SellerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
+    private final SellerRepository sellerRepository;
 
     @Transactional
     public ProductResponseDto createProduct(ProductRequestDto dto, Long sellerId) {
@@ -31,7 +31,7 @@ public class ProductService {
             throw new BadRequestException("SKU already exists: " + dto.getSku());
         }
 
-        User seller = userRepository.findById(sellerId)
+        Seller seller = sellerRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Seller not found with id: " + sellerId));
 
         Product product = Product.builder()

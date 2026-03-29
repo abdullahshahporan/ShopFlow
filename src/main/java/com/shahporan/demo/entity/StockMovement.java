@@ -2,6 +2,7 @@ package com.shahporan.demo.entity;
 
 import java.time.LocalDateTime;
 
+//import com.shahporan.demo.entity.Seller;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -39,7 +40,7 @@ public class StockMovement {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
-    private User seller;
+    private Seller seller;
 
     /**
      * IN or OUT

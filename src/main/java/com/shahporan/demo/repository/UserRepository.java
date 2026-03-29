@@ -18,7 +18,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmailIgnoreCase(String email);
 
-    long countByRoleIntAndEnabled(Integer roleInt, Boolean enabled);
-
     List<User> findAllByOrderByCreatedAtDesc();
 }

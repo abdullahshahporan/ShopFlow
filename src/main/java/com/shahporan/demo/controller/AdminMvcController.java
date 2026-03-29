@@ -2,7 +2,6 @@ package com.shahporan.demo.controller;
 
 import com.shahporan.demo.dto.UserResponseDto;
 import com.shahporan.demo.security.CustomUserDetails;
-import com.shahporan.demo.security.RoleMappings;
 import com.shahporan.demo.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -24,9 +23,9 @@ public class AdminMvcController {
         CustomUserDetails current = (CustomUserDetails) authentication.getPrincipal();
         List<UserResponseDto> users = adminService.getAllUsers();
 
-        long buyerCount = users.stream().filter(u -> u.getRoleInt() != null && u.getRoleInt() == RoleMappings.BUYER).count();
-        long sellerCount = users.stream().filter(u -> u.getRoleInt() != null && u.getRoleInt() == RoleMappings.SELLER).count();
-        long adminCount = users.stream().filter(u -> u.getRoleInt() != null && u.getRoleInt() == RoleMappings.ADMIN).count();
+        long buyerCount = adminService.countBuyers();
+        long sellerCount = adminService.countSellers();
+        long adminCount = adminService.countAdmins();
         long pendingSellerCount = adminService.countPendingSellers();
 
         model.addAttribute("users", users);
@@ -36,19 +35,6 @@ public class AdminMvcController {
         model.addAttribute("pendingSellerCount", pendingSellerCount);
         model.addAttribute("currentAdminId", current.getId());
         return "admin/users";
-    }
-
-    @PostMapping("/admin/users/{id}/role")
-    public String changeRole(@PathVariable Long id,
-                             @RequestParam("roleInt") Integer roleInt,
-                             RedirectAttributes redirectAttributes) {
-        try {
-            adminService.changeRole(id, roleInt);
-            redirectAttributes.addFlashAttribute("successMessage", "User role updated successfully.");
-        } catch (RuntimeException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-        }
-        return "redirect:/admin/users";
     }
 
     @PostMapping("/admin/users/{id}/toggle")

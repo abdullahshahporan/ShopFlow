@@ -1,17 +1,11 @@
 package com.shahporan.demo.entity;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -20,17 +14,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "users", indexes = {
-    @Index(name = "idx_users_role_enabled", columnList = "role_int, enabled"),
-    @Index(name = "idx_users_created_at", columnList = "created_at")
+@Table(name = "sellers", indexes = {
+        @Index(name = "idx_sellers_enabled", columnList = "enabled"),
+        @Index(name = "idx_sellers_created_at", columnList = "created_at")
 })
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class Seller {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,33 +41,18 @@ public class User {
     @Column(nullable = false)
     private String passwordHash;
 
-    /**
-     * Buyers table keeps role_int for backward DB compatibility and it is always BUYER(0).
-     */
-    @Column(name = "role_int", nullable = false)
-    @Builder.Default
-    private Integer roleInt = 0;
-
     @Column(nullable = false)
     @Builder.Default
-    private Boolean enabled = true;
+    private Boolean enabled = false;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    /* ── Relationships ── */
-    @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<Order> orders = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         if (this.enabled == null) {
-            this.enabled = true;
-        }
-        if (this.roleInt == null) {
-            this.roleInt = 0;
+            this.enabled = false;
         }
     }
 }

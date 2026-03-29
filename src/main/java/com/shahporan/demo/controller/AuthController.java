@@ -1,7 +1,10 @@
 package com.shahporan.demo.controller;
 
 import com.shahporan.demo.dto.RegisterRequest;
+import com.shahporan.demo.entity.Seller;
 import com.shahporan.demo.entity.User;
+import com.shahporan.demo.repository.AdminRepository;
+import com.shahporan.demo.repository.SellerRepository;
 import com.shahporan.demo.repository.UserRepository;
 import com.shahporan.demo.security.RoleMappings;
 import jakarta.validation.Valid;
@@ -18,10 +21,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AuthController {
 
     private final UserRepository userRepository;
+    private final SellerRepository sellerRepository;
+    private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(UserRepository userRepository,
+                          SellerRepository sellerRepository,
+                          AdminRepository adminRepository,
+                          PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.sellerRepository = sellerRepository;
+        this.adminRepository = adminRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -60,7 +70,7 @@ public class AuthController {
             return "register";
         }
 
-        saveUser(registerRequest, RoleMappings.BUYER, true);
+        saveBuyer(registerRequest);
         redirectAttributes.addFlashAttribute("successMessage", "Buyer account created successfully. You can now sign in.");
         return "redirect:/login?registeredBuyer";
     }
@@ -76,7 +86,7 @@ public class AuthController {
             return "register";
         }
 
-        saveUser(registerRequest, RoleMappings.SELLER, false);
+        saveSeller(registerRequest);
         redirectAttributes.addFlashAttribute("successMessage", "Seller registration request submitted. Please wait for admin approval.");
         return "redirect:/login?sellerPending";
     }
@@ -89,25 +99,44 @@ public class AuthController {
             bindingResult.rejectValue("confirmPassword", "password.mismatch", "Passwords do not match");
         }
 
-        if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+        if (emailExistsInAnyAccountTable(normalizedEmail)) {
             bindingResult.rejectValue("email", "email.duplicate", "Email is already registered");
         }
 
         return bindingResult.hasErrors();
     }
 
-    private void saveUser(RegisterRequest registerRequest, int roleInt, boolean enabled) {
+    private boolean emailExistsInAnyAccountTable(String normalizedEmail) {
+        return userRepository.existsByEmailIgnoreCase(normalizedEmail)
+                || sellerRepository.existsByEmailIgnoreCase(normalizedEmail)
+                || adminRepository.existsByEmailIgnoreCase(normalizedEmail);
+    }
+
+    private void saveBuyer(RegisterRequest registerRequest) {
         String normalizedEmail = registerRequest.getEmail().trim().toLowerCase();
 
         User user = User.builder()
                 .name(registerRequest.getName().trim())
                 .email(normalizedEmail)
                 .passwordHash(passwordEncoder.encode(registerRequest.getPassword()))
-                .roleInt(roleInt)
-                .enabled(enabled)
+                .roleInt(RoleMappings.BUYER)
+                .enabled(true)
                 .build();
 
         userRepository.save(user);
+    }
+
+    private void saveSeller(RegisterRequest registerRequest) {
+        String normalizedEmail = registerRequest.getEmail().trim().toLowerCase();
+
+        Seller seller = Seller.builder()
+                .name(registerRequest.getName().trim())
+                .email(normalizedEmail)
+                .passwordHash(passwordEncoder.encode(registerRequest.getPassword()))
+                .enabled(false)
+                .build();
+
+        sellerRepository.save(seller);
     }
 
     private void prepareRegisterPage(Model model,

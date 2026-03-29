@@ -1,11 +1,15 @@
 package com.shahporan.demo.controller;
 
+import com.shahporan.demo.entity.Admin;
+import com.shahporan.demo.entity.Seller;
 import com.shahporan.demo.entity.User;
+import com.shahporan.demo.repository.AdminRepository;
+import com.shahporan.demo.repository.SellerRepository;
 import com.shahporan.demo.repository.UserRepository;
 import com.shahporan.demo.security.CustomUserDetails;
-import com.shahporan.demo.security.RoleMappings;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +18,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 public class HomeController {
 
+    private final AdminRepository adminRepository;
+    private final SellerRepository sellerRepository;
     private final UserRepository userRepository;
 
     @GetMapping("/")
@@ -29,24 +35,42 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        User user = userRepository.findById(currentUser.getId()).orElse(null);
-        if (user == null) {
-            return "redirect:/login";
+        String role = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("ROLE_BUYER");
+
+        Object profileUser;
+        String roleLabel;
+        String dashboardUrl;
+
+        if ("ROLE_ADMIN".equals(role)) {
+            Admin admin = adminRepository.findById(currentUser.getId()).orElse(null);
+            if (admin == null) {
+                return "redirect:/login";
+            }
+            profileUser = admin;
+            roleLabel = "Admin";
+            dashboardUrl = "/admin/users";
+        } else if ("ROLE_SELLER".equals(role)) {
+            Seller seller = sellerRepository.findById(currentUser.getId()).orElse(null);
+            if (seller == null) {
+                return "redirect:/login";
+            }
+            profileUser = seller;
+            roleLabel = "Seller";
+            dashboardUrl = "/seller/products";
+        } else {
+            User user = userRepository.findById(currentUser.getId()).orElse(null);
+            if (user == null) {
+                return "redirect:/login";
+            }
+            profileUser = user;
+            roleLabel = "Buyer";
+            dashboardUrl = "/buyer/orders";
         }
 
-        String roleLabel = switch (user.getRoleInt()) {
-            case RoleMappings.ADMIN -> "Admin";
-            case RoleMappings.SELLER -> "Seller";
-            default -> "Buyer";
-        };
-
-        String dashboardUrl = switch (user.getRoleInt()) {
-            case RoleMappings.ADMIN -> "/admin/users";
-            case RoleMappings.SELLER -> "/seller/products";
-            default -> "/buyer/orders";
-        };
-
-        model.addAttribute("profileUser", user);
+        model.addAttribute("profileUser", profileUser);
         model.addAttribute("roleLabel", roleLabel);
         model.addAttribute("dashboardUrl", dashboardUrl);
         model.addAttribute("dashboardLabel", roleLabel + " Dashboard");

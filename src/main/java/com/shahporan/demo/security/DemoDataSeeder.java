@@ -10,11 +10,13 @@ import org.springframework.context.annotation.Configuration;
 import com.shahporan.demo.entity.Order;
 import com.shahporan.demo.entity.OrderItem;
 import com.shahporan.demo.entity.Product;
+import com.shahporan.demo.entity.Seller;
 import com.shahporan.demo.entity.StockMovement;
 import com.shahporan.demo.entity.User;
 import com.shahporan.demo.repository.OrderItemRepository;
 import com.shahporan.demo.repository.OrderRepository;
 import com.shahporan.demo.repository.ProductRepository;
+import com.shahporan.demo.repository.SellerRepository;
 import com.shahporan.demo.repository.StockMovementRepository;
 import com.shahporan.demo.repository.UserRepository;
 
@@ -24,13 +26,14 @@ public class DemoDataSeeder {
     @Bean
     public CommandLineRunner seedDemoData(
             UserRepository userRepository,
+                        SellerRepository sellerRepository,
             ProductRepository productRepository,
             OrderRepository orderRepository,
             OrderItemRepository orderItemRepository,
             StockMovementRepository stockMovementRepository) {
         return args -> {
             // Get existing demo users
-            User seller = userRepository.findByEmailIgnoreCase("seller@demo.com").orElse(null);
+                        Seller seller = sellerRepository.findByEmailIgnoreCase("seller@demo.com").orElse(null);
             User buyer = userRepository.findByEmailIgnoreCase("buyer@demo.com").orElse(null);
 
             if (seller == null || buyer == null) {
@@ -50,7 +53,7 @@ public class DemoDataSeeder {
     }
 
     private void seedProducts(
-            User seller,
+            Seller seller,
             ProductRepository productRepository,
             StockMovementRepository stockMovementRepository) {
         
@@ -147,7 +150,7 @@ public class DemoDataSeeder {
 
     private void seedOrders(
             User buyer,
-            User seller,
+            Seller seller,
             ProductRepository productRepository,
             OrderRepository orderRepository,
             OrderItemRepository orderItemRepository) {
