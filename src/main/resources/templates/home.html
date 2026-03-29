@@ -71,6 +71,25 @@
             color: #fff;
         }
 
+        .profile-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #fff;
+            color: #b45309;
+            text-decoration: none;
+            font-size: 16px;
+            border: 1px solid #f8c8a8;
+        }
+
+        .profile-pill:hover {
+            color: #8b4a1d;
+            background: #fff2e8;
+        }
+
         .main-header {
             background: var(--daraz-orange);
             color: #fff;
@@ -335,9 +354,14 @@
             <div class="daraz-shell top-strip-inner">
                 <div class="strip-left">FESTIVE FLASH DEALS | FREE DELIVERY OVER BDT 1,500</div>
                 <div class="strip-right">
-                    <a th:href="@{/products}" style="text-decoration: none; color: #8b4a1d; font-weight: 700;">Track Order</a>
+                    <sec:authorize access="isAuthenticated()">
+                        <a th:href="@{/profile}" style="text-decoration: none; color: #8b4a1d; font-weight: 700;">My Profile</a>
+                    </sec:authorize>
                     <sec:authorize access="isAnonymous()">
                         <a th:href="@{/login}" class="signin-pill"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
+                    </sec:authorize>
+                    <sec:authorize access="isAuthenticated()">
+                        <a th:href="@{/profile}" class="profile-pill" title="Profile"><i class="bi bi-person-circle"></i></a>
                     </sec:authorize>
                 </div>
             </div>
@@ -350,7 +374,7 @@
                     <input type="text" placeholder="Search for Products...." aria-label="Search products">
                     <button type="submit"><i class="bi bi-search"></i></button>
                 </form>
-                <a th:href="@{/products}" class="header-action"><i class="bi bi-grid"></i> Browse All</a>
+                <a th:href="@{/profile}" class="header-action"><i class="bi bi-person-circle"></i> My Profile</a>
             </div>
         </header>
 
@@ -363,7 +387,7 @@
                             Explore trending gadgets, home essentials, fashion picks, and more. This is a dummy storefront section for now, ready for your real product feed later.
                         </p>
                         <div class="hero-cta">
-                            <a th:href="@{/products}" class="btn-orange"><i class="bi bi-lightning-charge"></i> Shop Now</a>
+                            <a th:href="@{/profile}" class="btn-orange"><i class="bi bi-person-circle"></i> Go To Profile</a>
                         </div>
                     </div>
                     <div class="hero-cards">
@@ -378,7 +402,7 @@
             <section>
                 <div class="section-head">
                     <h2>Just For You</h2>
-                    <a th:href="@{/products}">View More</a>
+                    <a th:href="@{/profile}">Open Profile</a>
                 </div>
 
                 <div class="product-grid">

@@ -13,9 +13,9 @@
         </a>
 
         <!-- Buyer Links -->
-        <a sec:authorize="hasRole('BUYER')" th:href="@{/products}" class="sidebar-nav-item">
-            <i class="bi bi-grid"></i>
-            <span>Browse Products</span>
+        <a sec:authorize="hasRole('BUYER')" th:href="@{/profile}" class="sidebar-nav-item">
+            <i class="bi bi-person-circle"></i>
+            <span>My Profile</span>
         </a>
         <a sec:authorize="hasRole('BUYER')" th:href="@{/buyer/orders}" class="sidebar-nav-item">
             <i class="bi bi-bag-check"></i>
@@ -23,9 +23,9 @@
         </a>
 
         <!-- Seller Links -->
-        <a sec:authorize="hasRole('SELLER')" th:href="@{/products}" class="sidebar-nav-item">
-            <i class="bi bi-grid"></i>
-            <span>Browse Products</span>
+        <a sec:authorize="hasRole('SELLER')" th:href="@{/profile}" class="sidebar-nav-item">
+            <i class="bi bi-person-circle"></i>
+            <span>My Profile</span>
         </a>
         <a sec:authorize="hasRole('SELLER')" th:href="@{/seller/products}" class="sidebar-nav-item">
             <i class="bi bi-box-seam"></i>
@@ -37,9 +37,9 @@
         </a>
 
         <!-- Admin Links -->
-        <a sec:authorize="hasRole('ADMIN')" th:href="@{/products}" class="sidebar-nav-item">
-            <i class="bi bi-grid"></i>
-            <span>Browse Products</span>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/profile}" class="sidebar-nav-item">
+            <i class="bi bi-person-circle"></i>
+            <span>My Profile</span>
         </a>
         <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/users}" class="sidebar-nav-item">
             <i class="bi bi-people"></i>
