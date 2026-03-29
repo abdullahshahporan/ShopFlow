@@ -149,6 +149,24 @@
             white-space: nowrap;
         }
 
+        .header-icon-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            color: #fff;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            font-size: 18px;
+        }
+
+        .header-icon-action:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
         .hero-band {
             margin-top: 14px;
             border-radius: 14px;
@@ -354,9 +372,6 @@
             <div class="daraz-shell top-strip-inner">
                 <div class="strip-left">FESTIVE FLASH DEALS | FREE DELIVERY OVER BDT 1,500</div>
                 <div class="strip-right">
-                    <sec:authorize access="isAuthenticated()">
-                        <a th:href="@{/profile}" style="text-decoration: none; color: #8b4a1d; font-weight: 700;">My Profile</a>
-                    </sec:authorize>
                     <sec:authorize access="isAnonymous()">
                         <a th:href="@{/login}" class="signin-pill"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
                     </sec:authorize>
@@ -374,7 +389,12 @@
                     <input type="text" placeholder="Search for Products...." aria-label="Search products">
                     <button type="submit"><i class="bi bi-search"></i></button>
                 </form>
-                <a th:href="@{/profile}" class="header-action"><i class="bi bi-person-circle"></i> My Profile</a>
+                <sec:authorize access="isAuthenticated()">
+                    <a th:href="@{/profile}" class="header-icon-action" title="Profile"><i class="bi bi-person-circle"></i></a>
+                </sec:authorize>
+                <sec:authorize access="isAnonymous()">
+                    <a th:href="@{/login}" class="header-action"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
+                </sec:authorize>
             </div>
         </header>
 
@@ -386,8 +406,11 @@
                         <p class="hero-sub">
                             Explore trending gadgets, home essentials, fashion picks, and more. This is a dummy storefront section for now, ready for your real product feed later.
                         </p>
-                        <div class="hero-cta">
+                        <div class="hero-cta" sec:authorize="isAuthenticated()">
                             <a th:href="@{/profile}" class="btn-orange"><i class="bi bi-person-circle"></i> Go To Profile</a>
+                        </div>
+                        <div class="hero-cta" sec:authorize="isAnonymous()">
+                            <a th:href="@{/login}" class="btn-orange"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
                         </div>
                     </div>
                     <div class="hero-cards">
@@ -402,7 +425,9 @@
             <section>
                 <div class="section-head">
                     <h2>Just For You</h2>
-                    <a th:href="@{/profile}">Open Profile</a>
+                    <sec:authorize access="isAuthenticated()">
+                        <a th:href="@{/profile}">Open Profile</a>
+                    </sec:authorize>
                 </div>
 
                 <div class="product-grid">

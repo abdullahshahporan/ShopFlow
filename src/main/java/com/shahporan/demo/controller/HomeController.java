@@ -1,11 +1,20 @@
 package com.shahporan.demo.controller;
 
+import com.shahporan.demo.entity.User;
+import com.shahporan.demo.repository.UserRepository;
+import com.shahporan.demo.security.CustomUserDetails;
+import com.shahporan.demo.security.RoleMappings;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
+@RequiredArgsConstructor
 public class HomeController {
+
+    private final UserRepository userRepository;
 
     @GetMapping("/")
     public String home() {
@@ -13,22 +22,34 @@ public class HomeController {
     }
 
     @GetMapping("/profile")
-    public String profile(Authentication authentication) {
-        if (authentication == null || authentication.getAuthorities() == null) {
+    public String profile(Authentication authentication, Model model) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails currentUser)) {
             return "redirect:/login";
         }
 
-        if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))) {
-            return "redirect:/admin/users";
-        }
-        if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_SELLER".equals(a.getAuthority()))) {
-            return "redirect:/seller/products";
-        }
-        if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_BUYER".equals(a.getAuthority()))) {
-            return "redirect:/buyer/orders";
+        User user = userRepository.findById(currentUser.getId()).orElse(null);
+        if (user == null) {
+            return "redirect:/login";
         }
 
-        return "redirect:/";
+        String roleLabel = switch (user.getRoleInt()) {
+            case RoleMappings.ADMIN -> "Admin";
+            case RoleMappings.SELLER -> "Seller";
+            default -> "Buyer";
+        };
+
+        String dashboardUrl = switch (user.getRoleInt()) {
+            case RoleMappings.ADMIN -> "/admin/users";
+            case RoleMappings.SELLER -> "/seller/products";
+            default -> "/buyer/orders";
+        };
+
+        model.addAttribute("profileUser", user);
+        model.addAttribute("roleLabel", roleLabel);
+        model.addAttribute("dashboardUrl", dashboardUrl);
+        model.addAttribute("dashboardLabel", roleLabel + " Dashboard");
+
+        return "profile";
     }
 
     @GetMapping("/access-denied")
