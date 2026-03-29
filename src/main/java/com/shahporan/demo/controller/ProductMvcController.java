@@ -1,6 +1,7 @@
 package com.shahporan.demo.controller;
 
 import com.shahporan.demo.dto.ProductRequestDto;
+import com.shahporan.demo.dto.ProductResponseDto;
 import com.shahporan.demo.security.CustomUserDetails;
 import com.shahporan.demo.service.ProductService;
 import jakarta.validation.Valid;
@@ -11,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,7 +31,13 @@ public class ProductMvcController {
     @GetMapping("/seller/products")
     public String sellerProducts(Model model, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
-        model.addAttribute("products", productService.getProductsBySeller(user.getId()));
+        List<ProductResponseDto> products = productService.getProductsBySeller(user.getId());
+        long activeProductCount = products.stream().filter(ProductResponseDto::isActive).count();
+        long outOfStockCount = products.stream().filter(p -> p.getQuantity() != null && p.getQuantity() == 0).count();
+
+        model.addAttribute("products", products);
+        model.addAttribute("activeProductCount", activeProductCount);
+        model.addAttribute("outOfStockCount", outOfStockCount);
         return "seller/products";
     }
 

@@ -27,7 +27,7 @@
                         <i class="bi bi-bag-check"></i>
                     </div>
                     <div>
-                        <div class="stat-value" th:text="${orders.size()}" th:unless="${orders == null}">0</div>
+                        <div class="stat-value" th:text="${orders != null ? orders.size() : 0}">0</div>
                         <div class="stat-label">Total Orders</div>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
                         <i class="bi bi-currency-dollar"></i>
                     </div>
                     <div>
-                        <div class="stat-value" th:text="'$' + ${orders?.stream().map(o -> o.total).reduce(T(java.math.BigDecimal).ZERO, (a,b) -> a.add(b)) ?: 0}" th:unless="${orders == null}">$0</div>
+                        <div class="stat-value" th:text="'$' + ${#numbers.formatDecimal(totalSpent, 1, 2)}">$0</div>
                         <div class="stat-label">Total Spent</div>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
                         </a>
                     </div>
 
-                    <div th:if="${orders != null and !orders.isEmpty()}" class="table-responsive">
+                    <div th:if="${orders != null and not #lists.isEmpty(orders)}" class="table-responsive">
                         <table class="table">
                             <thead>
                             <tr>
@@ -67,12 +67,12 @@
                             <tbody>
                             <tr th:each="order : ${orders}">
                                 <td><strong style="color: var(--primary);">#<span th:text="${order.id}"></span></strong></td>
-                                <td><small th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}"></small></td>
-                                <td th:text="${order.items.size()} + ' item' + (${order.items.size() != 1} ? 's' : '')"></td>
+                                <td><small th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'MMM dd, yyyy') : '-'}"></small></td>
+                                <td th:text="${#lists.size(order.items)} + ' item' + (${#lists.size(order.items) != 1} ? 's' : '')"></td>
                                 <td><strong th:text="'$' + ${#numbers.formatDecimal(order.total, 1, 2)}"></strong></td>
                                 <td><span class="badge badge-warning" style="background: #FEF3C7; color: #92400E;" th:text="${order.status}"></span></td>
                                 <td>
-                                    <a th:href="@{'/buyer/orders/' + ${order.id}}" class="btn btn-outline-primary btn-sm">
+                                    <a th:href="@{/buyer/orders/{id}(id=${order.id})}" class="btn btn-outline-primary btn-sm">
                                         <i class="bi bi-eye"></i> View
                                     </a>
                                 </td>
@@ -81,7 +81,7 @@
                         </table>
                     </div>
 
-                    <div th:if="${orders == null or orders.isEmpty()}" class="empty-state">
+                    <div th:if="${orders == null or #lists.isEmpty(orders)}" class="empty-state">
                         <i class="bi bi-bag-x"></i>
                         <h5>No Orders Yet</h5>
                         <p class="text-muted">Start shopping to place your first order.</p>

@@ -12,7 +12,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -24,7 +26,13 @@ public class OrderMvcController {
     @GetMapping("/buyer/orders")
     public String orders(Model model, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
-        model.addAttribute("orders", orderService.getOrdersByBuyer(user.getId()));
+        List<com.shahporan.demo.dto.OrderResponseDto> orders = orderService.getOrdersByBuyer(user.getId());
+        BigDecimal totalSpent = orders.stream()
+                .map(o -> o.getTotal() == null ? BigDecimal.ZERO : o.getTotal())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        model.addAttribute("orders", orders);
+        model.addAttribute("totalSpent", totalSpent);
         return "buyer/orders";
     }
 

@@ -83,12 +83,14 @@ public class OrderService {
         return toResponse(order);
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponseDto> getOrdersByBuyer(Long buyerId) {
         return orderRepository.findByBuyerIdOrderByCreatedAtDesc(buyerId).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public OrderResponseDto getOrderById(Long orderId, Long buyerId, String role) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));

@@ -80,16 +80,19 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    @Transactional(readOnly = true)
     public ProductResponseDto getProductById(Long productId) {
         Product product = productRepository.findByIdAndActiveTrue(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
         return toResponse(product);
     }
 
+    @Transactional(readOnly = true)
     public List<ProductResponseDto> getAllActiveProducts() {
         return productRepository.findByActiveTrue().stream().map(this::toResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ProductResponseDto> getProductsBySeller(Long sellerId) {
         return productRepository.findBySellerId(sellerId).stream().map(this::toResponse).toList();
     }
