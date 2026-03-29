@@ -5,9 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In | ShopFlow</title>
     <th:block th:replace="~{fragments/layout :: head}"></th:block>
+    <style>
+        .cart-login-snackbar {
+            position: fixed;
+            left: 50%;
+            bottom: 22px;
+            transform: translateX(-50%) translateY(24px);
+            background: #111827;
+            color: #fff;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            box-shadow: 0 10px 25px rgba(17, 24, 39, 0.32);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.22s ease;
+            z-index: 1080;
+        }
+
+        .cart-login-snackbar.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
 </head>
 <body class="public-layout">
 <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+<div id="cart-login-snackbar" class="cart-login-snackbar" th:if="${param.cartSigninRequired}">
+    To add items to cart, sign in first.
+</div>
 
 <main class="d-flex align-items-center justify-content-center py-5">
     <div class="card" style="max-width: 460px; width: 100%; border-radius: 16px;">
@@ -82,5 +110,21 @@
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function () {
+        const snackbar = document.getElementById('cart-login-snackbar');
+        if (!snackbar) {
+            return;
+        }
+
+        requestAnimationFrame(function () {
+            snackbar.classList.add('show');
+        });
+
+        setTimeout(function () {
+            snackbar.classList.remove('show');
+        }, 2600);
+    })();
+</script>
 </body>
 </html>

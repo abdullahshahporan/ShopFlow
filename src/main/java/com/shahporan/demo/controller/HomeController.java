@@ -1,5 +1,6 @@
 package com.shahporan.demo.controller;
 
+import com.shahporan.demo.dto.ProductResponseDto;
 import com.shahporan.demo.entity.Admin;
 import com.shahporan.demo.entity.Seller;
 import com.shahporan.demo.entity.User;
@@ -7,12 +8,19 @@ import com.shahporan.demo.repository.AdminRepository;
 import com.shahporan.demo.repository.SellerRepository;
 import com.shahporan.demo.repository.UserRepository;
 import com.shahporan.demo.security.CustomUserDetails;
+import com.shahporan.demo.service.ProductService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -21,11 +29,41 @@ public class HomeController {
     private final AdminRepository adminRepository;
     private final SellerRepository sellerRepository;
     private final UserRepository userRepository;
+    private final ProductService productService;
 
     @GetMapping("/")
-    public String home(Authentication authentication, Model model) {
+    public String home(Authentication authentication, HttpSession session, Model model) {
         boolean isSignedIn = authentication != null && authentication.getPrincipal() instanceof CustomUserDetails;
+        String role = authentication != null
+                ? authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse("")
+                : "";
+        boolean isBuyer = "ROLE_BUYER".equals(role);
+        boolean isSellerOrAdmin = "ROLE_SELLER".equals(role) || "ROLE_ADMIN".equals(role);
+
+        int cartCount = 0;
+        Map<Long, Integer> cartQtyByProduct = new LinkedHashMap<>();
+        Object rawCart = session.getAttribute("BUYER_CART");
+        if (isBuyer && rawCart instanceof java.util.Map<?, ?> cartMap) {
+            for (Map.Entry<?, ?> entry : cartMap.entrySet()) {
+                if (entry.getKey() instanceof Long productId && entry.getValue() instanceof Integer qty) {
+                    int safeQty = Math.max(0, qty);
+                    cartQtyByProduct.put(productId, safeQty);
+                    cartCount += safeQty;
+                }
+            }
+        }
+
+        List<ProductResponseDto> homeProducts = productService.getAllActiveProducts().stream()
+                .sorted(Comparator.comparing(ProductResponseDto::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .limit(12)
+                .toList();
+
         model.addAttribute("isSignedIn", isSignedIn);
+        model.addAttribute("isBuyer", isBuyer);
+        model.addAttribute("isSellerOrAdmin", isSellerOrAdmin);
+        model.addAttribute("cartCount", cartCount);
+        model.addAttribute("cartQtyByProduct", cartQtyByProduct);
+        model.addAttribute("homeProducts", homeProducts);
         return "home";
     }
 

@@ -167,6 +167,23 @@
             color: #fff;
         }
 
+        .cart-badge {
+            position: absolute;
+            top: -6px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            font-weight: 700;
+        }
+
         .hero-band {
             margin-top: 14px;
             border-radius: 14px;
@@ -350,6 +367,84 @@
             font-size: 12px;
         }
 
+        .qty-control {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-right: 8px;
+        }
+
+        .qty-control button {
+            border: 0;
+            background: #fff;
+            width: 30px;
+            height: 32px;
+            font-weight: 700;
+            color: #374151;
+        }
+
+        .qty-control input {
+            width: 48px;
+            height: 32px;
+            text-align: center;
+            border: 0;
+            border-left: 1px solid #e5e7eb;
+            border-right: 1px solid #e5e7eb;
+            outline: none;
+            font-size: 13px;
+        }
+
+        .cart-action-row {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .cart-qty-inline {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 34px;
+        }
+
+        .cart-qty-inline button {
+            border: 0;
+            background: #fff;
+            width: 34px;
+            height: 34px;
+            font-weight: 700;
+            color: #374151;
+        }
+
+        .cart-qty-inline span {
+            min-width: 40px;
+            text-align: center;
+            border-left: 1px solid #e5e7eb;
+            border-right: 1px solid #e5e7eb;
+            font-size: 13px;
+            font-weight: 700;
+            color: #111827;
+            line-height: 34px;
+        }
+
+        .cart-add-btn {
+            border: 1px solid #f57224;
+            color: #f57224;
+            background: #fff;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .cart-add-btn:hover {
+            background: #fff2e8;
+        }
+
         @media (max-width: 900px) {
             .main-header-inner {
                 grid-template-columns: 1fr;
@@ -366,7 +461,19 @@
         }
     </style>
 </head>
-<body class="public-layout">
+<body class="public-layout" th:attr="data-csrf-token=${_csrf != null ? _csrf.token : ''},data-csrf-header=${_csrf != null ? _csrf.headerName : ''}">
+    <div class="daraz-shell" th:if="${successMessage != null or errorMessage != null}" style="margin-top: 10px;">
+        <div class="alert-modern alert-success-modern" th:if="${successMessage != null}">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div class="alert-modern alert-danger-modern" th:if="${errorMessage != null}">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${errorMessage}"></span>
+        </div>
+    </div>
+    <div class="daraz-shell" id="home-action-message" style="margin-top: 10px; display: none;"></div>
+
     <main>
         <section class="top-strip">
             <div class="daraz-shell top-strip-inner">
@@ -383,7 +490,13 @@
                     <button type="submit"><i class="bi bi-search"></i></button>
                 </form>
                 <th:block th:if="${isSignedIn}">
-                    <a th:href="@{/profile}" class="header-icon-action" title="Profile"><i class="bi bi-person-circle"></i></a>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <a th:if="${isBuyer}" th:href="@{/buyer/cart}" class="header-icon-action" title="Cart" style="position: relative;">
+                            <i class="bi bi-cart3"></i>
+                            <span id="home-cart-badge" class="cart-badge" th:style="${cartCount > 0 ? '' : 'display:none;'}" th:text="${cartCount}">0</span>
+                        </a>
+                        <a th:href="@{/profile}" class="header-icon-action" title="Profile"><i class="bi bi-person-circle"></i></a>
+                    </div>
                 </th:block>
                 <th:block th:if="${!isSignedIn}">
                     <a th:href="@{/login}" class="header-action"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
@@ -397,7 +510,7 @@
                     <div>
                         <h1 class="hero-title">Discover Hot Picks At Unbeatable Prices</h1>
                         <p class="hero-sub">
-                            Explore trending gadgets, home essentials, fashion picks, and more. This is a dummy storefront section for now, ready for your real product feed later.
+                            Explore products added by active sellers across electronics, essentials, and daily picks.
                         </p>
                         <div class="hero-cta" th:if="${isSignedIn}">
                             <a th:href="@{/profile}" class="btn-orange"><i class="bi bi-person-circle"></i> Go To Profile</a>
@@ -423,102 +536,62 @@
                     </th:block>
                 </div>
 
-                <div class="product-grid">
-                    <article class="product-card">
+                <div class="product-grid" th:if="${homeProducts != null and not #lists.isEmpty(homeProducts)}">
+                    <article class="product-card" th:each="product : ${homeProducts}">
                         <div class="product-thumb">
-                            <span class="discount-badge">-25%</span>
-                            <i class="bi bi-phone"></i>
+                            <span class="discount-badge" th:if="${product.quantity != null and product.quantity <= 5}">Low Stock</span>
+                            <i class="bi bi-box-seam"></i>
                         </div>
                         <div class="product-body">
-                            <p class="product-name">Nova X Pro Smartphone 256GB</p>
-                            <div class="price-line"><span class="price-main">BDT 32,999</span><span class="price-old">BDT 43,999</span></div>
-                            <div class="product-meta">4.7★ | 190 sold</div>
-                        </div>
-                    </article>
+                            <p class="product-name" th:text="${product.name}">Product Name</p>
+                            <div class="price-line">
+                                <span class="price-main" th:text="${'BDT ' + #numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">BDT 0.00</span>
+                            </div>
+                            <div class="product-meta" th:text="${'Seller: ' + (product.sellerName != null ? product.sellerName : 'Unknown') + ' | Stock: ' + (product.quantity != null ? product.quantity : 0)}">Seller and stock</div>
 
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <span class="discount-badge">-18%</span>
-                            <i class="bi bi-smartwatch"></i>
-                        </div>
-                        <div class="product-body">
-                            <p class="product-name">PulseFit Smartwatch Active Edition</p>
-                            <div class="price-line"><span class="price-main">BDT 4,499</span><span class="price-old">BDT 5,499</span></div>
-                            <div class="product-meta">4.5★ | 620 sold</div>
-                        </div>
-                    </article>
+                            <div class="cart-action-row" th:if="${isBuyer}" th:with="currentQty=${cartQtyByProduct != null ? cartQtyByProduct[product.id] : null}" th:attr="data-product-id=${product.id},data-stock=${product.quantity != null ? product.quantity : 0}">
+                                <form class="home-cart-add-form" th:action="@{/buyer/cart/api/add}" method="post" th:style="${currentQty == null or currentQty <= 0 ? 'display:flex; align-items:center; margin:0;' : 'display:none;'}">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <input type="hidden" name="productId" th:value="${product.id}">
+                                    <input type="hidden" name="qty" value="1">
 
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <span class="discount-badge">-30%</span>
-                            <i class="bi bi-headphones"></i>
-                        </div>
-                        <div class="product-body">
-                            <p class="product-name">BassMax Wireless Noise-Cancel Headphone</p>
-                            <div class="price-line"><span class="price-main">BDT 2,799</span><span class="price-old">BDT 3,999</span></div>
-                            <div class="product-meta">4.8★ | 410 sold</div>
-                        </div>
-                    </article>
+                                    <button type="submit" class="cart-add-btn" th:disabled="${product.quantity == null or product.quantity < 1}">
+                                        <i class="bi bi-cart-plus"></i> Add to Cart
+                                    </button>
+                                </form>
 
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <span class="discount-badge">-22%</span>
-                            <i class="bi bi-house-door"></i>
-                        </div>
-                        <div class="product-body">
-                            <p class="product-name">Aroma Home Air Purifier Compact</p>
-                            <div class="price-line"><span class="price-main">BDT 6,990</span><span class="price-old">BDT 8,990</span></div>
-                            <div class="product-meta">4.4★ | 145 sold</div>
-                        </div>
-                    </article>
+                                <form class="home-cart-qty-form" th:action="@{/buyer/cart/api/update}" method="post" th:style="${currentQty != null and currentQty > 0 ? 'display:flex; align-items:center; margin:0;' : 'display:none;'}">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <input type="hidden" name="productId" th:value="${product.id}">
 
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <span class="discount-badge">-35%</span>
-                            <i class="bi bi-laptop"></i>
-                        </div>
-                        <div class="product-body">
-                            <p class="product-name">HyperBook 14" Student Laptop i5</p>
-                            <div class="price-line"><span class="price-main">BDT 54,500</span><span class="price-old">BDT 83,500</span></div>
-                            <div class="product-meta">4.6★ | 85 sold</div>
-                        </div>
-                    </article>
+                                    <div class="cart-qty-inline">
+                                        <button type="button" class="home-cart-update-btn" data-action="dec">-</button>
+                                        <span class="home-cart-current-qty" th:text="${currentQty != null ? currentQty : 0}">1</span>
+                                        <button type="button" class="home-cart-update-btn" data-action="inc" th:disabled="${product.quantity == null or currentQty == null or currentQty >= product.quantity}">+</button>
+                                    </div>
+                                </form>
+                            </div>
 
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <span class="discount-badge">-15%</span>
-                            <i class="bi bi-cup-hot"></i>
-                        </div>
-                        <div class="product-body">
-                            <p class="product-name">Insulated Travel Mug Premium Steel</p>
-                            <div class="price-line"><span class="price-main">BDT 799</span><span class="price-old">BDT 949</span></div>
-                            <div class="product-meta">4.3★ | 980 sold</div>
-                        </div>
-                    </article>
+                            <div class="cart-action-row" th:if="${isSellerOrAdmin}">
+                                <button type="button" class="cart-add-btn" onclick="alert('Go to Buyer Account to use Add to Cart.')">
+                                    <i class="bi bi-cart-x"></i> Add to Cart
+                                </button>
+                            </div>
 
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <span class="discount-badge">-28%</span>
-                            <i class="bi bi-controller"></i>
-                        </div>
-                        <div class="product-body">
-                            <p class="product-name">ZenPlay Wireless Gaming Controller</p>
-                            <div class="price-line"><span class="price-main">BDT 3,250</span><span class="price-old">BDT 4,500</span></div>
-                            <div class="product-meta">4.7★ | 222 sold</div>
+                            <div class="cart-action-row" th:if="${!isSignedIn}">
+                                <button type="button" class="cart-add-btn home-guest-cart-btn" th:attr="data-login-url=@{/login(cartSigninRequired=true)}">
+                                    <i class="bi bi-cart-plus"></i> Add to Cart
+                                </button>
+                            </div>
                         </div>
                     </article>
+                </div>
 
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <span class="discount-badge">-10%</span>
-                            <i class="bi bi-backpack4"></i>
-                        </div>
-                        <div class="product-body">
-                            <p class="product-name">Urban Trek Multi-Pocket Backpack</p>
-                            <div class="price-line"><span class="price-main">BDT 1,890</span><span class="price-old">BDT 2,100</span></div>
-                            <div class="product-meta">4.2★ | 1.3k sold</div>
-                        </div>
-                    </article>
+                <div class="card" th:if="${homeProducts == null or #lists.isEmpty(homeProducts)}" style="border-radius: 10px;">
+                    <div class="card-body" style="padding: 24px; text-align: center; color: var(--daraz-muted);">
+                        <i class="bi bi-shop" style="font-size: 28px;"></i>
+                        <p style="margin: 10px 0 0;">No products available yet. Seller products will appear here automatically.</p>
+                    </div>
                 </div>
             </section>
         </div>
@@ -526,5 +599,158 @@
 
     <footer th:replace="~{fragments/layout :: footer}"></footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function getHomeCsrf() {
+            const body = document.body;
+            const token = body ? body.getAttribute('data-csrf-token') : null;
+            const header = body ? body.getAttribute('data-csrf-header') : null;
+            if (!token || !header) {
+                return null;
+            }
+            return {
+                token: token,
+                header: header
+            };
+        }
+
+        function showHomeMessage(message, isError) {
+            const host = document.getElementById('home-action-message');
+            if (!host) {
+                return;
+            }
+
+            host.style.display = 'block';
+            host.innerHTML = '<div class="' + (isError ? 'alert-modern alert-danger-modern' : 'alert-modern alert-success-modern') + '">' +
+                '<i class="bi ' + (isError ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill') + '"></i>' +
+                '<span>' + message + '</span>' +
+                '</div>';
+
+            window.clearTimeout(window.__homeMessageTimer);
+            window.__homeMessageTimer = window.setTimeout(function () {
+                host.style.display = 'none';
+                host.innerHTML = '';
+            }, 2200);
+        }
+
+        function updateBadge(count) {
+            const badge = document.getElementById('home-cart-badge');
+            if (!badge) {
+                return;
+            }
+
+            const nextCount = Number(count || 0);
+            if (nextCount > 0) {
+                badge.style.display = 'inline-flex';
+                badge.textContent = String(nextCount);
+            } else {
+                badge.style.display = 'none';
+                badge.textContent = '0';
+            }
+        }
+
+        function syncCardState(cardRow, qty) {
+            const addForm = cardRow.querySelector('.home-cart-add-form');
+            const qtyForm = cardRow.querySelector('.home-cart-qty-form');
+            const qtyText = cardRow.querySelector('.home-cart-current-qty');
+            const incBtn = cardRow.querySelector('.home-cart-update-btn[data-action="inc"]');
+            const stock = Number(cardRow.getAttribute('data-stock') || '0');
+            const safeQty = Number(qty || 0);
+
+            if (safeQty > 0) {
+                if (addForm) {
+                    addForm.style.display = 'none';
+                }
+                if (qtyForm) {
+                    qtyForm.style.display = 'flex';
+                }
+                if (qtyText) {
+                    qtyText.textContent = String(safeQty);
+                }
+                if (incBtn) {
+                    incBtn.disabled = stock > 0 ? safeQty >= stock : true;
+                }
+            } else {
+                if (addForm) {
+                    addForm.style.display = 'flex';
+                }
+                if (qtyForm) {
+                    qtyForm.style.display = 'none';
+                }
+            }
+        }
+
+        async function postHomeCart(url, params) {
+            const csrf = getHomeCsrf();
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            };
+            if (csrf) {
+                headers[csrf.header] = csrf.token;
+            }
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: new URLSearchParams(params).toString(),
+                credentials: 'same-origin'
+            });
+
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (e) {
+                data = { success: false, message: 'Unexpected server response.' };
+            }
+
+            return {
+                ok: response.ok,
+                data: data
+            };
+        }
+
+        document.querySelectorAll('.home-cart-add-form').forEach(function (form) {
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                const row = form.closest('.cart-action-row');
+                const productId = form.querySelector('input[name="productId"]').value;
+                const result = await postHomeCart(form.action, { productId: productId, qty: '1' });
+                const data = result.data || {};
+
+                if (result.ok && data.success) {
+                    syncCardState(row, data.productQty);
+                    updateBadge(data.cartCount);
+                    showHomeMessage(data.message || 'Added to cart.', false);
+                } else {
+                    showHomeMessage(data.message || 'Could not add product to cart.', true);
+                }
+            });
+        });
+
+        document.querySelectorAll('.home-cart-update-btn').forEach(function (button) {
+            button.addEventListener('click', async function () {
+                const row = button.closest('.cart-action-row');
+                const qtyForm = row.querySelector('.home-cart-qty-form');
+                const productId = qtyForm.querySelector('input[name="productId"]').value;
+                const action = button.getAttribute('data-action');
+                const result = await postHomeCart(qtyForm.action, { productId: productId, action: action });
+                const data = result.data || {};
+
+                if (result.ok && data.success) {
+                    syncCardState(row, data.productQty);
+                    updateBadge(data.cartCount);
+                } else {
+                    showHomeMessage(data.message || 'Could not update cart.', true);
+                }
+            });
+        });
+
+        document.querySelectorAll('.home-guest-cart-btn').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const loginUrl = button.getAttribute('data-login-url') || '/login?cartSigninRequired=true';
+                window.location.href = loginUrl;
+            });
+        });
+    </script>
 </body>
 </html>

@@ -21,6 +21,10 @@
             <i class="bi bi-bag-check"></i>
             <span>My Orders</span>
         </a>
+        <a sec:authorize="hasRole('BUYER')" th:href="@{/buyer/cart}" class="sidebar-nav-item">
+            <i class="bi bi-cart3"></i>
+            <span>My Cart</span>
+        </a>
 
         <!-- Seller Links -->
         <a sec:authorize="hasRole('SELLER')" th:href="@{/profile}" class="sidebar-nav-item">
