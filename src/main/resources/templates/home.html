@@ -5,105 +5,482 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home | ShopFlow</title>
     <th:block th:replace="~{fragments/layout :: head}"></th:block>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap');
+
+        :root {
+            --daraz-orange: #f57224;
+            --daraz-orange-dark: #e9681a;
+            --daraz-ink: #1f1f27;
+            --daraz-bg: #f5f5f5;
+            --daraz-surface: #ffffff;
+            --daraz-muted: #6b7280;
+            --daraz-border: #ececec;
+        }
+
+        body.public-layout {
+            font-family: 'Manrope', 'Segoe UI', Tahoma, sans-serif;
+            background: radial-gradient(circle at 0% 0%, #fff4ea 0, transparent 38%), var(--daraz-bg);
+            color: var(--daraz-ink);
+        }
+
+        .daraz-shell {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 14px;
+        }
+
+        .top-strip {
+            background: linear-gradient(90deg, #ffe3cc, #fff2e5);
+            border-bottom: 1px solid #f0d2bb;
+        }
+
+        .top-strip-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+        .strip-left {
+            color: #8b4a1d;
+            font-weight: 700;
+        }
+
+        .strip-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .signin-pill {
+            background: var(--daraz-orange);
+            color: #fff;
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: 0.2px;
+        }
+
+        .signin-pill:hover {
+            background: var(--daraz-orange-dark);
+            color: #fff;
+        }
+
+        .main-header {
+            background: var(--daraz-orange);
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(245, 114, 36, 0.28);
+        }
+
+        .main-header-inner {
+            display: grid;
+            grid-template-columns: 180px 1fr auto;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 0;
+        }
+
+        .brand {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 800;
+            font-size: 29px;
+            line-height: 1;
+            letter-spacing: -0.3px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .search-box input {
+            width: 100%;
+            border: 0;
+            outline: none;
+            padding: 12px 14px;
+            font-size: 14px;
+        }
+
+        .search-box button {
+            border: 0;
+            background: #ffe9da;
+            color: #b34d0f;
+            width: 48px;
+            height: 44px;
+            font-size: 18px;
+        }
+
+        .header-action {
+            color: #fff;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .hero-band {
+            margin-top: 14px;
+            border-radius: 14px;
+            overflow: hidden;
+            background: linear-gradient(110deg, #fff 0%, #fff7f1 45%, #ffe2cb 100%);
+            border: 1px solid #ffd6b9;
+        }
+
+        .hero-inner {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 10px;
+            padding: 32px;
+            align-items: center;
+        }
+
+        .hero-title {
+            font-size: 34px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin: 0 0 12px;
+            color: #1f2937;
+        }
+
+        .hero-sub {
+            margin: 0 0 22px;
+            color: #475569;
+            max-width: 530px;
+            font-size: 15px;
+        }
+
+        .hero-cta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-orange {
+            background: var(--daraz-orange);
+            color: #fff;
+            border-radius: 9px;
+            padding: 10px 16px;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid var(--daraz-orange);
+        }
+
+        .btn-orange:hover {
+            background: var(--daraz-orange-dark);
+            border-color: var(--daraz-orange-dark);
+            color: #fff;
+        }
+
+        .btn-light-orange {
+            background: #fff;
+            color: #b45309;
+            border-radius: 9px;
+            padding: 10px 16px;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid #f5c9ab;
+        }
+
+        .hero-cards {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .mini-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #f1e3d8;
+            font-size: 13px;
+        }
+
+        .mini-card strong {
+            display: block;
+            font-size: 19px;
+            color: #111827;
+            margin-bottom: 2px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 24px 0 12px;
+        }
+
+        .section-head h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .section-head a {
+            font-size: 13px;
+            color: var(--daraz-orange);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: var(--daraz-surface);
+            border: 1px solid var(--daraz-border);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.11);
+        }
+
+        .product-thumb {
+            height: 160px;
+            background: linear-gradient(145deg, #f2f2f2, #fbfbfb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9aa1ad;
+            font-size: 38px;
+            position: relative;
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            border-radius: 5px;
+            padding: 4px 7px;
+        }
+
+        .product-body {
+            padding: 11px;
+        }
+
+        .product-name {
+            margin: 0 0 7px;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.35;
+            min-height: 38px;
+        }
+
+        .price-line {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .price-main {
+            color: var(--daraz-orange);
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .price-old {
+            color: #9ca3af;
+            font-size: 12px;
+            text-decoration: line-through;
+        }
+
+        .product-meta {
+            color: var(--daraz-muted);
+            font-size: 12px;
+        }
+
+        @media (max-width: 900px) {
+            .main-header-inner {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-inner {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            .hero-title {
+                font-size: 27px;
+            }
+        }
+    </style>
 </head>
 <body class="public-layout">
-    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
-
     <main>
-        <!-- Hero Section -->
-        <section style="background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%); color: white; padding: 80px 20px; text-align: center;">
-            <div class="container">
-                <i class="bi bi-shop" style="font-size: 48px; display: block; margin-bottom: 16px;"></i>
-                <h1 style="color: white; margin-bottom: 16px; font-size: 36px;">Welcome to ShopFlow</h1>
-                <p style="font-size: 18px; color: rgba(255,255,255,0.9); margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto;">
-                    Your complete retail store management solution. Buy, sell, and manage inventory with ease.
-                </p>
-
-                <!-- Conditional CTA buttons based on auth status -->
-                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <section class="top-strip">
+            <div class="daraz-shell top-strip-inner">
+                <div class="strip-left">FESTIVE FLASH DEALS | FREE DELIVERY OVER BDT 1,500</div>
+                <div class="strip-right">
+                    <a th:href="@{/products}" style="text-decoration: none; color: #8b4a1d; font-weight: 700;">Track Order</a>
                     <sec:authorize access="isAnonymous()">
-                        <a th:href="@{/products}" class="btn btn-light" style="padding: 12px 28px; font-weight: 600;">
-                            <i class="bi bi-grid"></i> Browse Products
-                        </a>
-                        <a th:href="@{/login}" class="btn btn-primary" style="padding: 12px 28px; font-weight: 600;">
-                            <i class="bi bi-box-arrow-in-right"></i> Sign In
-                        </a>
-                    </sec:authorize>
-
-                    <sec:authorize access="hasRole('BUYER')">
-                        <a th:href="@{/products}" class="btn btn-light" style="padding: 12px 28px; font-weight: 600;">
-                            <i class="bi bi-grid"></i> Browse Products
-                        </a>
-                        <a th:href="@{/buyer/orders}" class="btn btn-primary" style="padding: 12px 28px; font-weight: 600;">
-                            <i class="bi bi-bag-check"></i> My Orders
-                        </a>
-                    </sec:authorize>
-
-                    <sec:authorize access="hasRole('SELLER')">
-                        <a th:href="@{/seller/products}" class="btn btn-light" style="padding: 12px 28px; font-weight: 600;">
-                            <i class="bi bi-box-seam"></i> My Products
-                        </a>
-                        <a th:href="@{/seller/products/new}" class="btn btn-primary" style="padding: 12px 28px; font-weight: 600;">
-                            <i class="bi bi-plus-circle"></i> Add Product
-                        </a>
-                    </sec:authorize>
-
-                    <sec:authorize access="hasRole('ADMIN')">
-                        <a th:href="@{/products}" class="btn btn-light" style="padding: 12px 28px; font-weight: 600;">
-                            <i class="bi bi-grid"></i> Products
-                        </a>
-                        <a th:href="@{/admin/users}" class="btn btn-primary" style="padding: 12px 28px; font-weight: 600;">
-                            <i class="bi bi-people"></i> Users
-                        </a>
+                        <a th:href="@{/login}" class="signin-pill"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
                     </sec:authorize>
                 </div>
             </div>
         </section>
 
-        <!-- Features Section -->
-        <section style="padding: 60px 20px;">
-            <div class="container">
-                <div style="text-align: center; margin-bottom: 48px;">
-                    <h2>Key Features</h2>
-                    <p class="text-muted" style="font-size: 15px;">Everything you need to run your retail business</p>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
-                    <!-- Feature 1 -->
-                    <div class="card">
-                        <div class="card-body" style="text-align: center;">
-                            <div class="stat-icon bg-indigo-soft" style="margin: 0 auto 16px;">
-                                <i class="bi bi-box-seam"></i>
-                            </div>
-                            <h3 style="font-size: 18px; margin-bottom: 12px;">Product Management</h3>
-                            <p class="text-muted" style="font-size: 14px;">Sellers create and manage inventory with real-time stock tracking.</p>
-                        </div>
-                    </div>
-
-                    <!-- Feature 2 -->
-                    <div class="card">
-                        <div class="card-body" style="text-align: center;">
-                            <div class="stat-icon bg-indigo-soft" style="margin: 0 auto 16px;">
-                                <i class="bi bi-bag-check"></i>
-                            </div>
-                            <h3 style="font-size: 18px; margin-bottom: 12px;">Order Management</h3>
-                            <p class="text-muted" style="font-size: 14px;">Buyers browse, place orders, and track order history seamlessly.</p>
-                        </div>
-                    </div>
-
-                    <!-- Feature 3 -->
-                    <div class="card">
-                        <div class="card-body" style="text-align: center;">
-                            <div class="stat-icon bg-indigo-soft" style="margin: 0 auto 16px;">
-                                <i class="bi bi-people"></i>
-                            </div>
-                            <h3 style="font-size: 18px; margin-bottom: 12px;">User Management</h3>
-                            <p class="text-muted" style="font-size: 14px;">Admins control user roles, permissions, and account status.</p>
-                        </div>
-                    </div>
-                </div>
+        <header class="main-header">
+            <div class="daraz-shell main-header-inner">
+                <a th:href="@{/}" class="brand">Shop Flow</a>
+                <form class="search-box" action="#" method="get">
+                    <input type="text" placeholder="Search for Products...." aria-label="Search products">
+                    <button type="submit"><i class="bi bi-search"></i></button>
+                </form>
+                <a th:href="@{/products}" class="header-action"><i class="bi bi-grid"></i> Browse All</a>
             </div>
-        </section>
+        </header>
+
+        <div class="daraz-shell">
+            <section class="hero-band">
+                <div class="hero-inner">
+                    <div>
+                        <h1 class="hero-title">Discover Hot Picks At Unbeatable Prices</h1>
+                        <p class="hero-sub">
+                            Explore trending gadgets, home essentials, fashion picks, and more. This is a dummy storefront section for now, ready for your real product feed later.
+                        </p>
+                        <div class="hero-cta">
+                            <a th:href="@{/products}" class="btn-orange"><i class="bi bi-lightning-charge"></i> Shop Now</a>
+                            <a th:href="@{/login}" class="btn-light-orange"><i class="bi bi-person-circle"></i> Join & Save</a>
+                        </div>
+                    </div>
+                    <div class="hero-cards">
+                        <div class="mini-card"><strong>120K+</strong>Monthly Orders</div>
+                        <div class="mini-card"><strong>8,500+</strong>Products Live</div>
+                        <div class="mini-card"><strong>24/7</strong>Support Coverage</div>
+                        <div class="mini-card"><strong>99%</strong>Happy Shoppers</div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="section-head">
+                    <h2>Just For You</h2>
+                    <a th:href="@{/products}">View More</a>
+                </div>
+
+                <div class="product-grid">
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <span class="discount-badge">-25%</span>
+                            <i class="bi bi-phone"></i>
+                        </div>
+                        <div class="product-body">
+                            <p class="product-name">Nova X Pro Smartphone 256GB</p>
+                            <div class="price-line"><span class="price-main">BDT 32,999</span><span class="price-old">BDT 43,999</span></div>
+                            <div class="product-meta">4.7★ | 190 sold</div>
+                        </div>
+                    </article>
+
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <span class="discount-badge">-18%</span>
+                            <i class="bi bi-smartwatch"></i>
+                        </div>
+                        <div class="product-body">
+                            <p class="product-name">PulseFit Smartwatch Active Edition</p>
+                            <div class="price-line"><span class="price-main">BDT 4,499</span><span class="price-old">BDT 5,499</span></div>
+                            <div class="product-meta">4.5★ | 620 sold</div>
+                        </div>
+                    </article>
+
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <span class="discount-badge">-30%</span>
+                            <i class="bi bi-headphones"></i>
+                        </div>
+                        <div class="product-body">
+                            <p class="product-name">BassMax Wireless Noise-Cancel Headphone</p>
+                            <div class="price-line"><span class="price-main">BDT 2,799</span><span class="price-old">BDT 3,999</span></div>
+                            <div class="product-meta">4.8★ | 410 sold</div>
+                        </div>
+                    </article>
+
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <span class="discount-badge">-22%</span>
+                            <i class="bi bi-house-door"></i>
+                        </div>
+                        <div class="product-body">
+                            <p class="product-name">Aroma Home Air Purifier Compact</p>
+                            <div class="price-line"><span class="price-main">BDT 6,990</span><span class="price-old">BDT 8,990</span></div>
+                            <div class="product-meta">4.4★ | 145 sold</div>
+                        </div>
+                    </article>
+
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <span class="discount-badge">-35%</span>
+                            <i class="bi bi-laptop"></i>
+                        </div>
+                        <div class="product-body">
+                            <p class="product-name">HyperBook 14" Student Laptop i5</p>
+                            <div class="price-line"><span class="price-main">BDT 54,500</span><span class="price-old">BDT 83,500</span></div>
+                            <div class="product-meta">4.6★ | 85 sold</div>
+                        </div>
+                    </article>
+
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <span class="discount-badge">-15%</span>
+                            <i class="bi bi-cup-hot"></i>
+                        </div>
+                        <div class="product-body">
+                            <p class="product-name">Insulated Travel Mug Premium Steel</p>
+                            <div class="price-line"><span class="price-main">BDT 799</span><span class="price-old">BDT 949</span></div>
+                            <div class="product-meta">4.3★ | 980 sold</div>
+                        </div>
+                    </article>
+
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <span class="discount-badge">-28%</span>
+                            <i class="bi bi-controller"></i>
+                        </div>
+                        <div class="product-body">
+                            <p class="product-name">ZenPlay Wireless Gaming Controller</p>
+                            <div class="price-line"><span class="price-main">BDT 3,250</span><span class="price-old">BDT 4,500</span></div>
+                            <div class="product-meta">4.7★ | 222 sold</div>
+                        </div>
+                    </article>
+
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <span class="discount-badge">-10%</span>
+                            <i class="bi bi-backpack4"></i>
+                        </div>
+                        <div class="product-body">
+                            <p class="product-name">Urban Trek Multi-Pocket Backpack</p>
+                            <div class="price-line"><span class="price-main">BDT 1,890</span><span class="price-old">BDT 2,100</span></div>
+                            <div class="product-meta">4.2★ | 1.3k sold</div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
     </main>
 
     <footer th:replace="~{fragments/layout :: footer}"></footer>
