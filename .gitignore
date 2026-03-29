@@ -45,7 +45,10 @@ build/
 ### Environment & Configuration ###
 .env
 .env.local
+.env.*
 docker-compose.override.yml
+src/main/resources/application-local.properties
+src/main/resources/application-secrets.properties
 
 ### Temporary Files ###
 *.tmp

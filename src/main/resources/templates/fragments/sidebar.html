@@ -49,10 +49,12 @@
 
     <div class="sidebar-bottom">
         <div class="sidebar-user">
-            <div class="user-avatar" th:text="${#authentication.principal.name.charAt(0).toUpperCase()}"></div>
+            <div class="user-avatar" th:text="${#authentication != null and #authentication.name != null and #authentication.name.length() > 0 ? #strings.toUpperCase(#strings.substring(#authentication.name,0,1)) : 'U'}"></div>
             <div class="user-info">
                 <div class="user-name" sec:authentication="name"></div>
-                <div class="user-role" th:text="${#authentication.principal.getAuthorities()[0].getAuthority().replace('ROLE_', '')}"></div>
+                <div class="user-role" sec:authorize="hasRole('ADMIN')">ADMIN</div>
+                <div class="user-role" sec:authorize="hasRole('SELLER')">SELLER</div>
+                <div class="user-role" sec:authorize="hasRole('BUYER')">BUYER</div>
             </div>
         </div>
         <form th:action="@{/logout}" method="post">

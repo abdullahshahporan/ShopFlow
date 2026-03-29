@@ -1,6 +1,8 @@
 package com.shahporan.demo.controller;
 
+import com.shahporan.demo.dto.UserResponseDto;
 import com.shahporan.demo.security.CustomUserDetails;
+import com.shahporan.demo.security.RoleMappings;
 import com.shahporan.demo.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -8,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -18,7 +22,16 @@ public class AdminMvcController {
     @GetMapping("/admin/users")
     public String users(Model model, Authentication authentication) {
         CustomUserDetails current = (CustomUserDetails) authentication.getPrincipal();
-        model.addAttribute("users", adminService.getAllUsers());
+        List<UserResponseDto> users = adminService.getAllUsers();
+
+        long buyerCount = users.stream().filter(u -> u.getRoleInt() != null && u.getRoleInt() == RoleMappings.BUYER).count();
+        long sellerCount = users.stream().filter(u -> u.getRoleInt() != null && u.getRoleInt() == RoleMappings.SELLER).count();
+        long adminCount = users.stream().filter(u -> u.getRoleInt() != null && u.getRoleInt() == RoleMappings.ADMIN).count();
+
+        model.addAttribute("users", users);
+        model.addAttribute("buyerCount", buyerCount);
+        model.addAttribute("sellerCount", sellerCount);
+        model.addAttribute("adminCount", adminCount);
         model.addAttribute("currentAdminId", current.getId());
         return "admin/users";
     }

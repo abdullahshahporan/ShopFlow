@@ -34,7 +34,19 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("email")
-                        .defaultSuccessUrl("/", true)
+                                                .successHandler((request, response, authentication) -> {
+                                                        String redirectUrl = "/";
+
+                                                        if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))) {
+                                                                redirectUrl = "/admin/users";
+                                                        } else if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_SELLER".equals(a.getAuthority()))) {
+                                                                redirectUrl = "/seller/products";
+                                                        } else if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_BUYER".equals(a.getAuthority()))) {
+                                                                redirectUrl = "/buyer/orders";
+                                                        }
+
+                                                        response.sendRedirect(request.getContextPath() + redirectUrl);
+                                                })
                         .permitAll()
                 )
                 .logout(logout -> logout
