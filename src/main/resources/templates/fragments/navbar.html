@@ -16,7 +16,7 @@
                     <a class="nav-link" th:href="@{/login}" style="color: #6B7280; font-size: 14px;">Sign In</a>
                 </li>
                 <li class="nav-item" sec:authorize="isAnonymous()">
-                    <a class="btn btn-primary btn-sm ms-2" th:href="@{/register}" style="color: white;">Create Account</a>
+                    <a class="btn btn-primary btn-sm ms-2" th:href="@{/register/buyer}" style="color: white;">Create Account</a>
                 </li>
                 <li class="nav-item d-flex align-items-center ms-3" sec:authorize="isAuthenticated()">
                     <small sec:authentication="name" style="color: #111827; font-size: 13px;"></small>

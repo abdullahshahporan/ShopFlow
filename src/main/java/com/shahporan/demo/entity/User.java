@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -20,7 +21,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+    @Index(name = "idx_users_role_enabled", columnList = "role_int, enabled"),
+    @Index(name = "idx_users_created_at", columnList = "created_at")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -44,14 +48,14 @@ public class User {
     /**
      * 0 = BUYER, 1 = SELLER, 2 = ADMIN
      */
-    @Column(nullable = false)
+    @Column(name = "role_int", nullable = false)
     private Integer roleInt;
 
     @Column(nullable = false)
     @Builder.Default
     private Boolean enabled = true;
 
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     /* ── Relationships ── */

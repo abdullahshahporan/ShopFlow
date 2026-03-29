@@ -33,6 +33,9 @@
                 <div class="col-sm-6 col-xl-3">
                     <div class="card"><div class="card-body"><small class="text-muted">Admins</small><h4 th:text="${adminCount}">0</h4></div></div>
                 </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card border-warning"><div class="card-body"><small class="text-muted">Pending Sellers</small><h4 class="text-warning" th:text="${pendingSellerCount}">0</h4></div></div>
+                </div>
             </div>
 
             <div class="card">
@@ -68,7 +71,8 @@
                                 </td>
                                 <td>
                                     <span th:if="${user.enabled}" class="badge text-bg-success">Active</span>
-                                    <span th:if="${not user.enabled}" class="badge text-bg-secondary">Disabled</span>
+                                    <span th:if="${not user.enabled and user.roleInt == 1}" class="badge text-bg-warning">Pending Approval</span>
+                                    <span th:if="${not user.enabled and user.roleInt != 1}" class="badge text-bg-secondary">Disabled</span>
                                 </td>
                                 <td><small th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'MMM dd') : '-'}"></small></td>
                                 <td>
@@ -76,7 +80,7 @@
                                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                                         <button type="submit" class="btn btn-sm"
                                                 th:class="${user.enabled} ? 'btn btn-sm btn-outline-danger' : 'btn btn-sm btn-outline-success'"
-                                                th:text="${user.enabled} ? 'Disable' : 'Enable'">Toggle</button>
+                                                th:text="${not user.enabled and user.roleInt == 1} ? 'Approve Seller' : (${user.enabled} ? 'Disable' : 'Enable')">Toggle</button>
                                     </form>
                                     <small class="text-muted" th:if="${user.id == currentAdminId}">(Self)</small>
                                 </td>

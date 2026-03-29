@@ -29,6 +29,10 @@ public class AdminService {
                 .build()).toList();
     }
 
+    public long countPendingSellers() {
+        return userRepository.countByRoleIntAndEnabled(RoleMappings.SELLER, false);
+    }
+
     @Transactional
     public UserResponseDto changeRole(Long userId, Integer roleInt) {
         if (roleInt == null || roleInt < 0 || roleInt > 2) {

@@ -27,11 +27,13 @@ public class AdminMvcController {
         long buyerCount = users.stream().filter(u -> u.getRoleInt() != null && u.getRoleInt() == RoleMappings.BUYER).count();
         long sellerCount = users.stream().filter(u -> u.getRoleInt() != null && u.getRoleInt() == RoleMappings.SELLER).count();
         long adminCount = users.stream().filter(u -> u.getRoleInt() != null && u.getRoleInt() == RoleMappings.ADMIN).count();
+        long pendingSellerCount = adminService.countPendingSellers();
 
         model.addAttribute("users", users);
         model.addAttribute("buyerCount", buyerCount);
         model.addAttribute("sellerCount", sellerCount);
         model.addAttribute("adminCount", adminCount);
+        model.addAttribute("pendingSellerCount", pendingSellerCount);
         model.addAttribute("currentAdminId", current.getId());
         return "admin/users";
     }
