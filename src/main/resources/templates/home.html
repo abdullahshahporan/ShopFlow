@@ -371,14 +371,7 @@
         <section class="top-strip">
             <div class="daraz-shell top-strip-inner">
                 <div class="strip-left">FESTIVE FLASH DEALS | FREE DELIVERY OVER BDT 1,500</div>
-                <div class="strip-right">
-                    <sec:authorize access="isAnonymous()">
-                        <a th:href="@{/login}" class="signin-pill"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
-                    </sec:authorize>
-                    <sec:authorize access="isAuthenticated()">
-                        <a th:href="@{/profile}" class="profile-pill" title="Profile"><i class="bi bi-person-circle"></i></a>
-                    </sec:authorize>
-                </div>
+                <div class="strip-right"></div>
             </div>
         </section>
 
@@ -389,12 +382,12 @@
                     <input type="text" placeholder="Search for Products...." aria-label="Search products">
                     <button type="submit"><i class="bi bi-search"></i></button>
                 </form>
-                <sec:authorize access="isAuthenticated()">
+                <th:block th:if="${isSignedIn}">
                     <a th:href="@{/profile}" class="header-icon-action" title="Profile"><i class="bi bi-person-circle"></i></a>
-                </sec:authorize>
-                <sec:authorize access="isAnonymous()">
+                </th:block>
+                <th:block th:if="${!isSignedIn}">
                     <a th:href="@{/login}" class="header-action"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
-                </sec:authorize>
+                </th:block>
             </div>
         </header>
 
@@ -406,10 +399,10 @@
                         <p class="hero-sub">
                             Explore trending gadgets, home essentials, fashion picks, and more. This is a dummy storefront section for now, ready for your real product feed later.
                         </p>
-                        <div class="hero-cta" sec:authorize="isAuthenticated()">
+                        <div class="hero-cta" th:if="${isSignedIn}">
                             <a th:href="@{/profile}" class="btn-orange"><i class="bi bi-person-circle"></i> Go To Profile</a>
                         </div>
-                        <div class="hero-cta" sec:authorize="isAnonymous()">
+                        <div class="hero-cta" th:if="${!isSignedIn}">
                             <a th:href="@{/login}" class="btn-orange"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
                         </div>
                     </div>
@@ -425,9 +418,9 @@
             <section>
                 <div class="section-head">
                     <h2>Just For You</h2>
-                    <sec:authorize access="isAuthenticated()">
+                    <th:block th:if="${isSignedIn}">
                         <a th:href="@{/profile}">Open Profile</a>
-                    </sec:authorize>
+                    </th:block>
                 </div>
 
                 <div class="product-grid">

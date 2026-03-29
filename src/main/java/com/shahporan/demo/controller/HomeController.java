@@ -17,7 +17,9 @@ public class HomeController {
     private final UserRepository userRepository;
 
     @GetMapping("/")
-    public String home() {
+    public String home(Authentication authentication, Model model) {
+        boolean isSignedIn = authentication != null && authentication.getPrincipal() instanceof CustomUserDetails;
+        model.addAttribute("isSignedIn", isSignedIn);
         return "home";
     }
 
