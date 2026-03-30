@@ -47,6 +47,14 @@ public class Order {
     @Builder.Default
     private String status = "PENDING";
 
+    @Column(name = "payment_method", nullable = false)
+    @Builder.Default
+    private String paymentMethod = "COD";
+
+    @Column(name = "payment_status", nullable = false)
+    @Builder.Default
+    private String paymentStatus = "PENDING";
+
     @Column(nullable = false, precision = 14, scale = 2)
     @Builder.Default
     private BigDecimal total = BigDecimal.ZERO;
@@ -64,6 +72,12 @@ public class Order {
         this.createdAt = LocalDateTime.now();
         if (this.status == null) {
             this.status = "PENDING";
+        }
+        if (this.paymentMethod == null) {
+            this.paymentMethod = "COD";
+        }
+        if (this.paymentStatus == null) {
+            this.paymentStatus = "PENDING";
         }
         if (this.total == null) {
             this.total = BigDecimal.ZERO;

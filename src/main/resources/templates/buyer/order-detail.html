@@ -28,8 +28,16 @@
                             <div><span class="badge badge-warning" style="background: #FEF3C7; color: #92400E;" th:text="${order.status}"></span></div>
                         </div>
                         <div>
+                            <small class="text-muted">Payment Method</small>
+                            <div style="font-size: 15px; font-weight: 600;" th:text="${order.paymentMethod}"></div>
+                        </div>
+                        <div>
+                            <small class="text-muted">Payment Status</small>
+                            <div style="font-size: 15px; font-weight: 600;" th:text="${order.paymentStatus}"></div>
+                        </div>
+                        <div>
                             <small class="text-muted">Total</small>
-                            <div style="font-size: 20px; font-weight: 700;" th:text="'$' + ${#numbers.formatDecimal(order.total, 1, 2)}"></div>
+                            <div style="font-size: 20px; font-weight: 700;" th:text="'BDT ' + ${#numbers.formatDecimal(order.total, 1, 2)}"></div>
                         </div>
                     </div>
                 </div>
@@ -54,8 +62,8 @@
                             <tr th:each="item : ${order.items}">
                                 <td><strong th:text="${item.productName}"></strong></td>
                                 <td th:text="${item.qty} + ' units'"></td>
-                                <td th:text="'$' + ${#numbers.formatDecimal(item.unitPrice, 1, 2)}"></td>
-                                <td><strong th:text="'$' + ${#numbers.formatDecimal(item.subtotal, 1, 2)}"></strong></td>
+                                <td th:text="'BDT ' + ${#numbers.formatDecimal(item.unitPrice, 1, 2)}"></td>
+                                <td><strong th:text="'BDT ' + ${#numbers.formatDecimal(item.subtotal, 1, 2)}"></strong></td>
                             </tr>
                             </tbody>
                         </table>
@@ -65,7 +73,7 @@
                     <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); text-align: right;">
                         <div style="margin-bottom: 12px; color: var(--text-muted);">Subtotal</div>
                         <div style="margin-bottom: 8px; color: var(--text-muted);"><i class="bi bi-dash"></i></div>
-                        <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);">Total: <span th:text="'$' + ${#numbers.formatDecimal(order.total, 1, 2)}"></span></div>
+                        <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);">Total: <span th:text="'BDT ' + ${#numbers.formatDecimal(order.total, 1, 2)}"></span></div>
                     </div>
                 </div>
             </div>

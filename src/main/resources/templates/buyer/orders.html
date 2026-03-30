@@ -36,7 +36,7 @@
                         <i class="bi bi-currency-dollar"></i>
                     </div>
                     <div>
-                        <div class="stat-value" th:text="'$' + ${#numbers.formatDecimal(totalSpent, 1, 2)}">$0</div>
+                        <div class="stat-value" th:text="'BDT ' + ${#numbers.formatDecimal(totalSpent, 1, 2)}">BDT 0</div>
                         <div class="stat-label">Total Spent</div>
                     </div>
                 </div>
@@ -59,6 +59,7 @@
                                 <th>Order ID</th>
                                 <th>Date</th>
                                 <th>Items</th>
+                                <th>Payment</th>
                                 <th>Total</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -69,7 +70,11 @@
                                 <td><strong style="color: var(--primary);">#<span th:text="${order.id}"></span></strong></td>
                                 <td><small th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'MMM dd, yyyy') : '-'}"></small></td>
                                 <td th:text="${#lists.size(order.items)} + ' item' + (${#lists.size(order.items) != 1} ? 's' : '')"></td>
-                                <td><strong th:text="'$' + ${#numbers.formatDecimal(order.total, 1, 2)}"></strong></td>
+                                <td>
+                                    <div><small th:text="${order.paymentMethod}"></small></div>
+                                    <div><small class="text-muted" th:text="${order.paymentStatus}"></small></div>
+                                </td>
+                                <td><strong th:text="'BDT ' + ${#numbers.formatDecimal(order.total, 1, 2)}"></strong></td>
                                 <td><span class="badge badge-warning" style="background: #FEF3C7; color: #92400E;" th:text="${order.status}"></span></td>
                                 <td>
                                     <a th:href="@{/buyer/orders/{id}(id=${order.id})}" class="btn btn-outline-primary btn-sm">

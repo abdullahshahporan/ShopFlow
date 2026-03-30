@@ -22,9 +22,8 @@ public class ProductMvcController {
     private final ProductService productService;
 
     @GetMapping("/products")
-    public String products(Model model, Authentication authentication) {
+    public String products(Model model) {
         model.addAttribute("products", productService.getAllActiveProducts());
-        model.addAttribute("isAuthenticated", authentication != null && authentication.isAuthenticated());
         return "products";
     }
 

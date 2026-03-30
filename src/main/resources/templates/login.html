@@ -31,7 +31,12 @@
     </style>
 </head>
 <body class="public-layout">
-<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+<div style="padding: 20px 24px 0;">
+    <a th:href="@{/}" style="display: inline-flex; align-items: center; gap: 8px; color: var(--primary); font-weight: 700; font-size: 24px; text-decoration: none;">
+        <i class="bi bi-shop"></i>
+        <span>ShopFlow</span>
+    </a>
+</div>
 
 <div id="cart-login-snackbar" class="cart-login-snackbar" th:if="${param.cartSigninRequired}">
     To add items to cart, sign in first.

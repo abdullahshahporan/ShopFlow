@@ -7,6 +7,8 @@ import com.shahporan.demo.entity.Admin;
 import com.shahporan.demo.entity.Seller;
 import com.shahporan.demo.entity.User;
 import com.shahporan.demo.repository.AdminRepository;
+import com.shahporan.demo.repository.OrderItemRepository;
+import com.shahporan.demo.repository.OrderRepository;
 import com.shahporan.demo.repository.SellerRepository;
 import com.shahporan.demo.repository.UserRepository;
 import com.shahporan.demo.security.CustomUserDetails;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,6 +41,8 @@ public class HomeController {
     private final AdminRepository adminRepository;
     private final SellerRepository sellerRepository;
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final ProductService productService;
     private final PasswordEncoder passwordEncoder;
 
@@ -91,6 +96,10 @@ public class HomeController {
         Object profileUser;
         String roleLabel;
         String dashboardUrl;
+        String metricOneLabel;
+        Object metricOneValue;
+        String metricTwoLabel;
+        Object metricTwoValue;
 
         if ("ROLE_ADMIN".equals(role)) {
             Admin admin = adminRepository.findById(currentUser.getId()).orElse(null);
@@ -100,6 +109,10 @@ public class HomeController {
             profileUser = admin;
             roleLabel = "Admin";
             dashboardUrl = "/admin/users";
+            metricOneLabel = "Total Orders";
+            metricOneValue = orderRepository.count();
+            metricTwoLabel = "Gross Sales";
+            metricTwoValue = orderRepository.sumTotalAllOrders();
         } else if ("ROLE_SELLER".equals(role)) {
             Seller seller = sellerRepository.findById(currentUser.getId()).orElse(null);
             if (seller == null) {
@@ -108,6 +121,10 @@ public class HomeController {
             profileUser = seller;
             roleLabel = "Seller";
             dashboardUrl = "/seller/products";
+            metricOneLabel = "Units Sold";
+            metricOneValue = orderItemRepository.sumSoldUnitsBySellerId(currentUser.getId());
+            metricTwoLabel = "Total Revenue";
+            metricTwoValue = orderItemRepository.sumRevenueBySellerId(currentUser.getId());
         } else {
             User user = userRepository.findById(currentUser.getId()).orElse(null);
             if (user == null) {
@@ -116,12 +133,20 @@ public class HomeController {
             profileUser = user;
             roleLabel = "Buyer";
             dashboardUrl = "/buyer/orders";
+            metricOneLabel = "Orders Placed";
+            metricOneValue = orderRepository.countByBuyerId(currentUser.getId());
+            metricTwoLabel = "Total Spent";
+            metricTwoValue = orderRepository.sumTotalByBuyerId(currentUser.getId());
         }
 
         model.addAttribute("profileUser", profileUser);
         model.addAttribute("roleLabel", roleLabel);
         model.addAttribute("dashboardUrl", dashboardUrl);
         model.addAttribute("dashboardLabel", roleLabel + " Dashboard");
+        model.addAttribute("profileMetricOneLabel", metricOneLabel);
+        model.addAttribute("profileMetricOneValue", metricOneValue == null ? 0 : metricOneValue);
+        model.addAttribute("profileMetricTwoLabel", metricTwoLabel);
+        model.addAttribute("profileMetricTwoValue", metricTwoValue == null ? BigDecimal.ZERO : metricTwoValue);
         if (!model.containsAttribute("profileUpdateRequest")) {
             model.addAttribute("profileUpdateRequest", ProfileUpdateRequest.builder().name(extractName(profileUser)).build());
         }

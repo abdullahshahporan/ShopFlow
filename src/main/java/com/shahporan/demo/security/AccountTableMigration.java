@@ -22,6 +22,16 @@ public class AccountTableMigration implements CommandLineRunner {
       return;
     }
 
+        // Ensure newly introduced order payment columns exist in older databases.
+        jdbcTemplate.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(20)");
+        jdbcTemplate.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status VARCHAR(20)");
+        jdbcTemplate.update("UPDATE orders SET payment_method = 'COD' WHERE payment_method IS NULL");
+        jdbcTemplate.update("UPDATE orders SET payment_status = CASE WHEN status = 'CONFIRMED' THEN 'PAID' ELSE 'PENDING' END WHERE payment_status IS NULL");
+        jdbcTemplate.execute("ALTER TABLE orders ALTER COLUMN payment_method SET DEFAULT 'COD'");
+        jdbcTemplate.execute("ALTER TABLE orders ALTER COLUMN payment_status SET DEFAULT 'PENDING'");
+        jdbcTemplate.execute("ALTER TABLE orders ALTER COLUMN payment_method SET NOT NULL");
+        jdbcTemplate.execute("ALTER TABLE orders ALTER COLUMN payment_status SET NOT NULL");
+
         // Move existing SELLER and ADMIN rows out of users table into dedicated tables.
         jdbcTemplate.update("""
                 INSERT INTO sellers(name, email, password_hash, enabled, created_at)

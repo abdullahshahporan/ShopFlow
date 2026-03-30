@@ -83,8 +83,15 @@
 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
                         <a th:href="@{/}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Continue Shopping</a>
-                        <form th:action="@{/buyer/cart/checkout}" method="post" style="margin: 0;">
+                        <form th:action="@{/buyer/cart/checkout}" method="post" style="margin: 0; display: flex; gap: 10px; align-items: center;">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <select name="paymentMethod" class="form-select" style="min-width: 170px;" required>
+                                <option value="">Select Payment</option>
+                                <option value="COD">COD</option>
+                                <option value="BKASH">Bkash</option>
+                                <option value="NAGAD">Nagad</option>
+                                <option value="CARD">Card</option>
+                            </select>
                             <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> Place Order</button>
                         </form>
                     </div>

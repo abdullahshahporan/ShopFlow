@@ -78,7 +78,7 @@
                             <tr th:each="product : ${products}">
                                 <td th:text="${product.name}"></td>
                                 <td><code style="background: var(--bg-base); padding: 2px 6px; border-radius: 4px; font-size: 12px;" th:text="${product.sku}"></code></td>
-                                <td th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}"></td>
+                                <td th:text="'BDT ' + ${#numbers.formatDecimal(product.price, 1, 2)}"></td>
                                 <td>
                                     <span th:if="${product.quantity > 0}" th:text="${product.quantity}"></span>
                                     <span th:if="${product.quantity == 0}" style="color: var(--danger); font-weight: 600;">

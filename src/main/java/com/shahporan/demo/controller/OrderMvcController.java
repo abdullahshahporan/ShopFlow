@@ -50,10 +50,12 @@ public class OrderMvcController {
     @PostMapping("/buyer/orders")
     public String createOrder(@RequestParam("productId") java.util.List<Long> productIds,
                               @RequestParam("qty") java.util.List<Integer> qtys,
+                              @RequestParam("paymentMethod") String paymentMethod,
                               Authentication authentication,
                               RedirectAttributes redirectAttributes,
                               Model model) {
         OrderRequestDto dto = new OrderRequestDto();
+        dto.setPaymentMethod(paymentMethod);
         dto.setItems(new ArrayList<>());
 
         for (int i = 0; i < productIds.size(); i++) {
@@ -86,5 +88,35 @@ public class OrderMvcController {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         model.addAttribute("order", orderService.getOrderById(id, user.getId(), "ROLE_BUYER"));
         return "buyer/order-detail";
+    }
+
+    @GetMapping("/seller/orders")
+    public String sellerOrders(Model model, Authentication authentication) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        var orders = orderService.getOrdersBySeller(user.getId());
+        long orderCount = orders.size();
+        BigDecimal revenue = orders.stream()
+                .map(o -> o.getTotalAmount() == null ? BigDecimal.ZERO : o.getTotalAmount())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        model.addAttribute("sellerOrders", orders);
+        model.addAttribute("sellerOrderCount", orderCount);
+        model.addAttribute("sellerRevenue", revenue);
+        return "seller/orders";
+    }
+
+    @PostMapping("/seller/orders/{orderId}/status")
+    public String updateSellerOrderStatus(@PathVariable Long orderId,
+                                          @RequestParam("status") String status,
+                                          Authentication authentication,
+                                          RedirectAttributes redirectAttributes) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        try {
+            orderService.updateOrderStatusBySeller(orderId, user.getId(), status);
+            redirectAttributes.addFlashAttribute("successMessage", "Order status updated successfully.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/seller/orders";
     }
 }

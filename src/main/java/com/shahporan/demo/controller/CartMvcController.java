@@ -128,6 +128,7 @@ public class CartMvcController {
 
     @PostMapping("/buyer/cart/checkout")
     public String checkout(Authentication authentication,
+                           @RequestParam("paymentMethod") String paymentMethod,
                            HttpSession session,
                            RedirectAttributes redirectAttributes) {
         Map<Long, Integer> cart = getCart(session);
@@ -144,6 +145,7 @@ public class CartMvcController {
             item.setQty(entry.getValue());
             items.add(item);
         }
+        dto.setPaymentMethod(paymentMethod);
         dto.setItems(items);
 
         try {
@@ -158,7 +160,6 @@ public class CartMvcController {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Map<Long, Integer> getCart(HttpSession session) {
         Object raw = session.getAttribute(CART_SESSION_KEY);
         if (raw instanceof Map<?, ?> map) {

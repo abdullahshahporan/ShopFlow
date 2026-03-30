@@ -48,6 +48,10 @@
                         <div class="card-body" style="padding: 32px; display: flex; flex-direction: column; justify-content: center;">
                             <small class="text-muted">Joined</small>
                             <h3 style="margin: 6px 0 14px;" th:text="${profileUser.createdAt != null ? #temporals.format(profileUser.createdAt, 'MMM dd, yyyy') : '-'}">-</h3>
+                            <small class="text-muted" th:text="${profileMetricOneLabel}">Orders Placed</small>
+                            <h3 style="margin: 6px 0 14px;" th:text="${profileMetricOneValue}">0</h3>
+                            <small class="text-muted" th:text="${profileMetricTwoLabel}">Total Spent</small>
+                            <h3 style="margin: 6px 0 14px;" th:text="${'BDT ' + #numbers.formatDecimal(profileMetricTwoValue, 1, 2)}">BDT 0.00</h3>
                             <a th:href="@{${dashboardUrl}}" class="btn btn-primary">
                                 <i class="bi bi-arrow-right-circle"></i>
                                 <span th:text="${dashboardLabel}">Dashboard</span>

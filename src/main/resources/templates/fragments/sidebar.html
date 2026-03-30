@@ -35,6 +35,10 @@
             <i class="bi bi-box-seam"></i>
             <span>My Products</span>
         </a>
+        <a sec:authorize="hasRole('SELLER')" th:href="@{/seller/orders}" class="sidebar-nav-item">
+            <i class="bi bi-bag-check"></i>
+            <span>Order History</span>
+        </a>
         <a sec:authorize="hasRole('SELLER')" th:href="@{/seller/products/new}" class="sidebar-nav-item">
             <i class="bi bi-plus-circle"></i>
             <span>Add Product</span>
