@@ -11,6 +11,23 @@
     <div class="sidebar-content">
         <div th:replace="~{fragments/topbar :: topbar('My Profile')}"></div>
         <main>
+            <div class="alert-modern alert-success-modern mb-3" th:if="${profileSuccessMessage}">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${profileSuccessMessage}"></span>
+            </div>
+            <div class="alert-modern alert-danger-modern mb-3" th:if="${profileErrorMessage}">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${profileErrorMessage}"></span>
+            </div>
+            <div class="alert-modern alert-success-modern mb-3" th:if="${passwordSuccessMessage}">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${passwordSuccessMessage}"></span>
+            </div>
+            <div class="alert-modern alert-danger-modern mb-3" th:if="${passwordErrorMessage}">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${passwordErrorMessage}"></span>
+            </div>
+
             <div class="row g-3 mb-4">
                 <div class="col-lg-8">
                     <div class="card">
@@ -40,25 +57,72 @@
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-body" style="padding: 32px;">
-                    <h3 style="margin-bottom: 20px;">Profile Details</h3>
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <label>Full Name</label>
-                            <div class="form-control" th:text="${profileUser.name}">User Name</div>
+            <div class="row g-3">
+                <div class="col-lg-7">
+                    <div class="card h-100">
+                        <div class="card-body" style="padding: 32px;">
+                            <h3 style="margin-bottom: 20px;">Edit Profile</h3>
+                            <form th:action="@{/profile/update}" method="post" th:object="${profileUpdateRequest}">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Full Name</label>
+                                    <input type="text" id="name" class="form-control" th:field="*{name}" placeholder="Your full name" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" id="email" class="form-control" th:value="${profileUser.email}" readonly disabled>
+                                    <small class="text-muted" style="display: block; margin-top: 6px;">Email cannot be changed from this page.</small>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Role</label>
+                                        <div class="form-control" th:text="${roleLabel}">Buyer</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Status</label>
+                                        <div class="form-control" th:text="${profileUser.enabled ? 'Enabled' : 'Disabled'}">Enabled</div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg"></i>
+                                    Save Profile Changes
+                                </button>
+                            </form>
                         </div>
-                        <div class="col-md-6">
-                            <label>Email Address</label>
-                            <div class="form-control" th:text="${profileUser.email}">user@example.com</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label>Role</label>
-                            <div class="form-control" th:text="${roleLabel}">Buyer</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label>Status</label>
-                            <div class="form-control" th:text="${profileUser.enabled ? 'Enabled' : 'Disabled'}">Enabled</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="card h-100">
+                        <div class="card-body" style="padding: 32px;">
+                            <h3 style="margin-bottom: 20px;">Change Password</h3>
+                            <form th:action="@{/profile/password}" method="post" th:object="${passwordUpdateRequest}">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                                <div class="mb-3">
+                                    <label for="currentPassword" class="form-label">Current Password</label>
+                                    <input type="password" id="currentPassword" class="form-control" th:field="*{currentPassword}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">New Password</label>
+                                    <input type="password" id="newPassword" class="form-control" th:field="*{newPassword}" minlength="6" required>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                    <input type="password" id="confirmPassword" class="form-control" th:field="*{confirmPassword}" minlength="6" required>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-shield-lock"></i>
+                                    Update Password
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
