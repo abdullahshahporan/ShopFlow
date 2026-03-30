@@ -5,17 +5,17 @@ import com.shahporan.demo.dto.OrderItemResponseDto;
 import com.shahporan.demo.dto.OrderRequestDto;
 import com.shahporan.demo.dto.OrderResponseDto;
 import com.shahporan.demo.dto.SellerOrderSummaryDto;
+import com.shahporan.demo.entity.CancelOrder;
 import com.shahporan.demo.entity.Order;
-import com.shahporan.demo.entity.OrderItem;
 import com.shahporan.demo.entity.Product;
-import com.shahporan.demo.entity.StockMovement;
+import com.shahporan.demo.entity.Stock;
 import com.shahporan.demo.entity.User;
 import com.shahporan.demo.exception.BadRequestException;
 import com.shahporan.demo.exception.ResourceNotFoundException;
-import com.shahporan.demo.repository.OrderItemRepository;
+import com.shahporan.demo.repository.CancelOrderRepository;
 import com.shahporan.demo.repository.OrderRepository;
 import com.shahporan.demo.repository.ProductRepository;
-import com.shahporan.demo.repository.StockMovementRepository;
+import com.shahporan.demo.repository.StockRepository;
 import com.shahporan.demo.repository.UserRepository;
 import com.shahporan.demo.strategy.PaymentResult;
 import com.shahporan.demo.strategy.PaymentStrategy;
@@ -30,9 +30,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,9 +45,9 @@ public class OrderService {
     );
 
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
-    private final StockMovementRepository stockMovementRepository;
+    private final StockRepository stockRepository;
+    private final CancelOrderRepository cancelOrderRepository;
     private final UserRepository userRepository;
     private final PaymentStrategyResolver paymentStrategyResolver;
 
@@ -59,6 +58,7 @@ public class OrderService {
 
         Map<Long, Integer> requestedQtyByProduct = aggregateRequestedQuantities(dto.getItems());
         Map<Long, Product> productsById = loadAndValidateProducts(requestedQtyByProduct);
+        Map<Long, Stock> stockByProductId = loadAndValidateStock(requestedQtyByProduct, productsById);
         BigDecimal total = calculateTotal(requestedQtyByProduct, productsById);
 
         PaymentStrategy paymentStrategy = paymentStrategyResolver.resolve(dto.getPaymentMethod());
@@ -67,45 +67,77 @@ public class OrderService {
             throw new BadRequestException(paymentResult.getMessage());
         }
 
-        Order order = Order.builder()
-                .buyer(buyer)
-                .status("PENDING")
-            .paymentMethod(paymentResult.getPaymentMethod().name())
-            .paymentStatus(paymentResult.getPaymentStatus())
-            .total(total)
-                .items(new ArrayList<>())
-                .build();
-        order = orderRepository.save(order);
-
-        List<StockMovement> stockMovements = new ArrayList<>();
+        List<Stock> touchedStocks = new ArrayList<>();
+        List<Order> createdOrders = new ArrayList<>();
         for (Map.Entry<Long, Integer> entry : requestedQtyByProduct.entrySet()) {
             Product product = productsById.get(entry.getKey());
             int qty = entry.getValue();
+            Stock stock = stockByProductId.get(entry.getKey());
 
-            OrderItem item = OrderItem.builder()
-                    .order(order)
+            int remainingQty = stock.getQuantity() - qty;
+            stock.setQuantity(remainingQty);
+            product.setQuantity(remainingQty);
+            touchedStocks.add(stock);
+
+            Order order = Order.builder()
+                    .buyer(buyer)
                     .product(product)
                     .qty(qty)
                     .unitPrice(product.getPrice())
+                    .status("PENDING")
+                    .paymentMethod(paymentResult.getPaymentMethod().name())
+                    .paymentStatus(paymentResult.getPaymentStatus())
+                    .total(product.getPrice().multiply(BigDecimal.valueOf(qty)))
                     .build();
-            order.getItems().add(item);
-
-            product.setQuantity(product.getQuantity() - qty);
-
-                stockMovements.add(StockMovement.builder()
-                    .product(product)
-                    .seller(product.getSeller())
-                    .type(StockMovement.MovementType.OUT)
-                    .qty(qty)
-                    .note("Order #" + order.getId())
-                    .build());
+            createdOrders.add(orderRepository.save(order));
         }
 
-            productRepository.saveAll(productsById.values());
-            stockMovementRepository.saveAll(stockMovements);
-        order = orderRepository.save(order);
+        stockRepository.saveAll(touchedStocks);
+        productRepository.saveAll(productsById.values());
 
-        return toResponse(order);
+        return toResponse(createdOrders.get(0));
+    }
+
+    @Transactional
+    public void cancelOrderByBuyer(Long orderId, Long buyerId, String reason) {
+        Order order = orderRepository.findByIdAndBuyerId(orderId, buyerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+
+        if (!"PENDING".equals(normalizeStatus(order.getStatus()))) {
+            throw new BadRequestException("Order can be cancelled only before seller approval (PENDING status).");
+        }
+
+        if (cancelOrderRepository.existsByOriginalOrderId(orderId)) {
+            throw new BadRequestException("This order is already cancelled.");
+        }
+
+        Product product = order.getProduct();
+        Stock stock = stockRepository.findByProductId(product.getId())
+            .orElseGet(() -> stockRepository.save(Stock.builder()
+                .product(product)
+                .seller(product.getSeller())
+                .quantity(product.getQuantity() == null ? 0 : product.getQuantity())
+                .build()));
+        int restoredQty = (stock.getQuantity() == null ? 0 : stock.getQuantity()) + order.getQty();
+        stock.setQuantity(restoredQty);
+        product.setQuantity(restoredQty);
+        stockRepository.save(stock);
+        productRepository.save(product);
+
+        CancelOrder cancelOrder = CancelOrder.builder()
+                .originalOrderId(order.getId())
+                .buyer(order.getBuyer())
+                .status("CANCELLED")
+                .reason(trimReason(reason))
+                .total(order.getTotal())
+                .paymentMethod(order.getPaymentMethod())
+                .paymentStatus(order.getPaymentStatus())
+                .itemsSnapshot(buildItemsSnapshot(order))
+                .orderCreatedAt(order.getCreatedAt())
+                .build();
+        cancelOrderRepository.save(cancelOrder);
+
+        orderRepository.delete(order);
     }
 
     @Transactional(readOnly = true)
@@ -117,28 +149,17 @@ public class OrderService {
 
         @Transactional(readOnly = true)
         public List<SellerOrderSummaryDto> getOrdersBySeller(Long sellerId) {
-        List<OrderItem> sellerItems = orderItemRepository.findAllBySellerIdWithOrderAndBuyer(sellerId);
-        Map<Long, SellerOrderAccumulator> grouped = new LinkedHashMap<>();
-
-        for (OrderItem item : sellerItems) {
-            Order order = item.getOrder();
-            SellerOrderAccumulator accumulator = grouped.computeIfAbsent(order.getId(), ignored ->
-                new SellerOrderAccumulator(
-                    order.getId(),
-                    order.getBuyer() != null ? order.getBuyer().getName() : "Unknown Buyer",
-                    order.getPaymentMethod(),
-                    order.getPaymentStatus(),
-                    order.getStatus(),
-                    order.getCreatedAt()
-                ));
-
-            accumulator.totalUnits += item.getQty();
-            accumulator.totalAmount = accumulator.totalAmount.add(item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQty())));
-            accumulator.uniqueProducts.add(item.getProduct().getId());
-        }
-
-        return grouped.values().stream()
-            .map(SellerOrderAccumulator::toDto)
+        return orderRepository.findByProductSellerIdOrderByCreatedAtDesc(sellerId).stream()
+            .map(order -> SellerOrderSummaryDto.builder()
+                .orderId(order.getId())
+                .buyerName(order.getBuyer() != null ? order.getBuyer().getName() : "Unknown Buyer")
+                .paymentMethod(order.getPaymentMethod())
+                .paymentStatus(order.getPaymentStatus())
+                .status(order.getStatus())
+                .totalUnits(order.getQty())
+                .totalAmount(order.getTotal())
+                .createdAt(order.getCreatedAt())
+                .build())
             .toList();
         }
 
@@ -149,7 +170,7 @@ public class OrderService {
             throw new BadRequestException("Invalid status. Allowed: PENDING, APPROVED, ON_THE_WAY, DELIVERED.");
         }
 
-        boolean ownsOrder = orderItemRepository.existsByOrderIdAndProductSellerId(orderId, sellerId);
+        boolean ownsOrder = orderRepository.existsByIdAndProductSellerId(orderId, sellerId);
         if (!ownsOrder) {
             throw new AccessDeniedException("You are not allowed to update this order.");
         }
@@ -226,6 +247,35 @@ public class OrderService {
         return productsById;
     }
 
+    private Map<Long, Stock> loadAndValidateStock(Map<Long, Integer> requestedQtyByProduct,
+                                                  Map<Long, Product> productsById) {
+        List<Stock> existingStocks = stockRepository.findByProductIdIn(requestedQtyByProduct.keySet());
+        Map<Long, Stock> stockByProductId = existingStocks.stream()
+                .collect(Collectors.toMap(stock -> stock.getProduct().getId(), stock -> stock));
+
+        for (Map.Entry<Long, Integer> entry : requestedQtyByProduct.entrySet()) {
+            Long productId = entry.getKey();
+            Product product = productsById.get(productId);
+
+            Stock stock = stockByProductId.get(productId);
+            if (stock == null) {
+                stock = stockRepository.save(Stock.builder()
+                        .product(product)
+                        .seller(product.getSeller())
+                        .quantity(product.getQuantity() == null ? 0 : product.getQuantity())
+                        .build());
+                stockByProductId.put(productId, stock);
+            }
+
+            int availableQty = stock.getQuantity() == null ? 0 : stock.getQuantity();
+            if (availableQty < entry.getValue()) {
+                throw new BadRequestException("Insufficient stock for product: " + product.getName());
+            }
+        }
+
+        return stockByProductId;
+    }
+
     private BigDecimal calculateTotal(Map<Long, Integer> requestedQtyByProduct, Map<Long, Product> productsById) {
         BigDecimal total = BigDecimal.ZERO;
         for (Map.Entry<Long, Integer> entry : requestedQtyByProduct.entrySet()) {
@@ -236,15 +286,13 @@ public class OrderService {
     }
 
     private OrderResponseDto toResponse(Order order) {
-        List<OrderItemResponseDto> itemResponses = order.getItems().stream()
-                .map(item -> OrderItemResponseDto.builder()
-                        .productId(item.getProduct().getId())
-                        .productName(item.getProduct().getName())
-                        .qty(item.getQty())
-                        .unitPrice(item.getUnitPrice())
-                        .subtotal(item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQty())))
-                        .build())
-                .toList();
+        List<OrderItemResponseDto> itemResponses = List.of(OrderItemResponseDto.builder()
+            .productId(order.getProduct().getId())
+            .productName(order.getProduct().getName())
+            .qty(order.getQty())
+            .unitPrice(order.getUnitPrice())
+            .subtotal(order.getTotal())
+            .build());
 
         return OrderResponseDto.builder()
                 .id(order.getId())
@@ -259,49 +307,25 @@ public class OrderService {
                 .build();
     }
 
-    private static class SellerOrderAccumulator {
-        private final Long orderId;
-        private final String buyerName;
-        private final String paymentMethod;
-        private final String paymentStatus;
-        private final String status;
-        private final java.time.LocalDateTime createdAt;
-        private int totalUnits = 0;
-        private BigDecimal totalAmount = BigDecimal.ZERO;
-        private final Set<Long> uniqueProducts = new HashSet<>();
-
-        private SellerOrderAccumulator(Long orderId,
-                                       String buyerName,
-                                       String paymentMethod,
-                                       String paymentStatus,
-                                       String status,
-                                       java.time.LocalDateTime createdAt) {
-            this.orderId = orderId;
-            this.buyerName = buyerName;
-            this.paymentMethod = paymentMethod;
-            this.paymentStatus = paymentStatus;
-            this.status = status;
-            this.createdAt = createdAt;
-        }
-
-        private SellerOrderSummaryDto toDto() {
-            return SellerOrderSummaryDto.builder()
-                    .orderId(orderId)
-                    .buyerName(buyerName)
-                    .paymentMethod(paymentMethod)
-                    .paymentStatus(paymentStatus)
-                    .status(status)
-                    .totalUnits(totalUnits)
-                    .totalAmount(totalAmount)
-                    .createdAt(createdAt)
-                    .build();
-        }
-    }
-
     private String normalizeStatus(String status) {
         if (status == null || status.isBlank()) {
             throw new BadRequestException("Order status is required.");
         }
         return status.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private String trimReason(String reason) {
+        if (reason == null) {
+            return null;
+        }
+        String trimmed = reason.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+        return trimmed.length() > 500 ? trimmed.substring(0, 500) : trimmed;
+    }
+
+    private String buildItemsSnapshot(Order order) {
+        return order.getProduct().getName() + " x " + order.getQty();
     }
 }

@@ -17,7 +17,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByBuyerIdOrderByCreatedAtDesc(Long buyerId);
 
+    List<Order> findByProductSellerIdOrderByCreatedAtDesc(Long sellerId);
+
     Optional<Order> findByIdAndBuyerId(Long id, Long buyerId);
+
+    boolean existsByIdAndProductSellerId(Long id, Long sellerId);
 
     long countByBuyerId(Long buyerId);
 
@@ -26,4 +30,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("select coalesce(sum(o.total), 0) from Order o")
     BigDecimal sumTotalAllOrders();
+
+    @Query("select coalesce(sum(o.qty), 0) from Order o where o.product.seller.id = :sellerId")
+    Long sumSoldUnitsBySellerId(@Param("sellerId") Long sellerId);
+
+    @Query("select coalesce(sum(o.total), 0) from Order o where o.product.seller.id = :sellerId")
+    BigDecimal sumRevenueBySellerId(@Param("sellerId") Long sellerId);
 }

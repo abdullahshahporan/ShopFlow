@@ -90,6 +90,21 @@ public class OrderMvcController {
         return "buyer/order-detail";
     }
 
+    @PostMapping("/buyer/orders/{id}/cancel")
+    public String cancelOrder(@PathVariable Long id,
+                              @RequestParam(value = "reason", required = false) String reason,
+                              Authentication authentication,
+                              RedirectAttributes redirectAttributes) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        try {
+            orderService.cancelOrderByBuyer(id, user.getId(), reason);
+            redirectAttributes.addFlashAttribute("successMessage", "Order cancelled successfully.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/buyer/orders";
+    }
+
     @GetMapping("/seller/orders")
     public String sellerOrders(Model model, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();

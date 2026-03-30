@@ -7,7 +7,6 @@ import com.shahporan.demo.entity.Admin;
 import com.shahporan.demo.entity.Seller;
 import com.shahporan.demo.entity.User;
 import com.shahporan.demo.repository.AdminRepository;
-import com.shahporan.demo.repository.OrderItemRepository;
 import com.shahporan.demo.repository.OrderRepository;
 import com.shahporan.demo.repository.SellerRepository;
 import com.shahporan.demo.repository.UserRepository;
@@ -42,7 +41,6 @@ public class HomeController {
     private final SellerRepository sellerRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final ProductService productService;
     private final PasswordEncoder passwordEncoder;
 
@@ -122,9 +120,9 @@ public class HomeController {
             roleLabel = "Seller";
             dashboardUrl = "/seller/products";
             metricOneLabel = "Units Sold";
-            metricOneValue = orderItemRepository.sumSoldUnitsBySellerId(currentUser.getId());
+            metricOneValue = orderRepository.sumSoldUnitsBySellerId(currentUser.getId());
             metricTwoLabel = "Total Revenue";
-            metricTwoValue = orderItemRepository.sumRevenueBySellerId(currentUser.getId());
+            metricTwoValue = orderRepository.sumRevenueBySellerId(currentUser.getId());
         } else {
             User user = userRepository.findById(currentUser.getId()).orElse(null);
             if (user == null) {

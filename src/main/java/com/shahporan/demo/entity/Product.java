@@ -2,8 +2,6 @@ package com.shahporan.demo.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 //import com.shahporan.demo.entity.Seller;
 import jakarta.persistence.Column;
@@ -14,7 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -60,10 +58,8 @@ public class Product {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    /* ── Relationships ── */
-    @OneToMany(mappedBy = "product")
-    @Builder.Default
-    private List<OrderItem> orderItems = new ArrayList<>();
+    @OneToOne(mappedBy = "product")
+    private Stock stock;
 
     @PrePersist
     protected void onCreate() {

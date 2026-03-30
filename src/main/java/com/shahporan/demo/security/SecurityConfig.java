@@ -25,6 +25,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/products/*").hasRole("SELLER")
                         .requestMatchers(HttpMethod.DELETE, "/api/products/*").hasRole("SELLER")
                         .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("BUYER")
+                        .requestMatchers(HttpMethod.POST, "/api/orders/*/cancel").hasRole("BUYER")
                         .requestMatchers(HttpMethod.GET, "/api/orders/my").hasRole("BUYER")
                         .requestMatchers(HttpMethod.GET, "/api/orders/*").hasAnyRole("BUYER", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

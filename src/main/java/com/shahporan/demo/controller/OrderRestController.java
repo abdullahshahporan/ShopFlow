@@ -40,4 +40,13 @@ public class OrderRestController {
         String role = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse("ROLE_BUYER");
         return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrderById(id, user.getId(), role));
     }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancel(@PathVariable Long id,
+                                       @RequestParam(value = "reason", required = false) String reason,
+                                       Authentication authentication) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        orderService.cancelOrderByBuyer(id, user.getId(), reason);
+        return ResponseEntity.noContent().build();
+    }
 }
