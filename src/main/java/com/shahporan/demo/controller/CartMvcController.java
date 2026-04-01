@@ -207,10 +207,17 @@ public class CartMvcController {
 
         ProductResponseDto product = productService.getProductById(productId);
         int available = product.getQuantity() == null ? 0 : product.getQuantity();
+
+        if (available < 1) {
+            cart.remove(productId);
+            session.setAttribute(CART_SESSION_KEY, cart);
+            return failure(session, productId, "Item is out of stock and has been removed from your cart.");
+        }
+
         int next = current;
 
         if ("inc".equalsIgnoreCase(action)) {
-            next = Math.min(current + 1, Math.max(available, 1));
+            next = Math.min(current + 1, available);
         } else if ("dec".equalsIgnoreCase(action)) {
             next = current - 1;
         }
