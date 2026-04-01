@@ -45,7 +45,12 @@ public class CartMvcController {
                 ProductResponseDto product = productService.getProductById(entry.getKey());
                 int qty = Math.max(1, entry.getValue());
                 int available = product.getQuantity() == null ? 0 : product.getQuantity();
-                int finalQty = Math.min(qty, Math.max(available, 1));
+                if (available < 1) {
+                    // Remove out-of-stock products from session cart.
+                    invalidProductIds.add(entry.getKey());
+                    continue;
+                }
+                int finalQty = Math.min(qty, available);
                 BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(finalQty));
                 grandTotal = grandTotal.add(subtotal);
                 lines.add(new CartLineView(product, finalQty, subtotal));
