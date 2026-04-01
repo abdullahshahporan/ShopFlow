@@ -5,18 +5,16 @@ import lombok.Value;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Value
 @Builder
-public class OrderResponseDto {
-    Long id;
-    Long buyerId;
+public class SellerOrderSummaryDto {
+    Long orderId;
     String buyerName;
-    String status;
     String paymentMethod;
     String paymentStatus;
-    BigDecimal total;
-    List<OrderItemResponseDto> items;
+    String status;
+    Integer totalUnits;
+    BigDecimal totalAmount;
     LocalDateTime createdAt;
 }

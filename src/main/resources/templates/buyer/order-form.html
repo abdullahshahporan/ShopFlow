@@ -23,6 +23,17 @@
                     <form th:action="@{/buyer/orders}" method="post">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
+                        <div style="margin-bottom: 20px; max-width: 320px;">
+                            <label for="paymentMethod" class="form-label">Payment Method</label>
+                            <select id="paymentMethod" name="paymentMethod" class="form-select" required>
+                                <option value="">Select Payment Method</option>
+                                <option value="COD">COD</option>
+                                <option value="BKASH">Bkash</option>
+                                <option value="NAGAD">Nagad</option>
+                                <option value="CARD">Card</option>
+                            </select>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="table">
                                 <thead>
@@ -40,7 +51,7 @@
                                         <strong th:text="${product.name}"></strong>
                                     </td>
                                     <td><code style="background: var(--bg-base); padding: 2px 6px; border-radius: 4px; font-size: 12px;" th:text="${product.sku}"></code></td>
-                                    <td th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}"></td>
+                                    <td th:text="'BDT ' + ${#numbers.formatDecimal(product.price, 1, 2)}"></td>
                                     <td>
                                         <span th:if="${product.quantity > 0}" th:text="${product.quantity} + ' left'"></span>
                                         <span th:if="${product.quantity == 0}" class="badge" style="background: #FEE2E2; color: #991B1B;">Out of Stock</span>

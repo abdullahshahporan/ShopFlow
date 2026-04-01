@@ -1,8 +1,9 @@
 package com.shahporan.demo.service;
 
 import com.shahporan.demo.dto.UserResponseDto;
-import com.shahporan.demo.exception.BadRequestException;
 import com.shahporan.demo.exception.ResourceNotFoundException;
+import com.shahporan.demo.repository.AdminRepository;
+import com.shahporan.demo.repository.SellerRepository;
 import com.shahporan.demo.repository.UserRepository;
 import com.shahporan.demo.security.RoleMappings;
 import lombok.RequiredArgsConstructor;
@@ -15,62 +16,54 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminService {
 
+    private final AdminRepository adminRepository;
+    private final SellerRepository sellerRepository;
     private final UserRepository userRepository;
 
     public List<UserResponseDto> getAllUsers() {
-        return userRepository.findAllByOrderByCreatedAtDesc().stream().map(user -> UserResponseDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .roleInt(user.getRoleInt())
-                .role(RoleMappings.toAuthority(user.getRoleInt()))
-                .enabled(user.getEnabled())
-                .createdAt(user.getCreatedAt())
+        return sellerRepository.findAllByOrderByCreatedAtDesc().stream().map(seller -> UserResponseDto.builder()
+                .id(seller.getId())
+                .name(seller.getName())
+                .email(seller.getEmail())
+                .roleInt(RoleMappings.SELLER)
+                .role("ROLE_SELLER")
+                .enabled(seller.getEnabled())
+                .createdAt(seller.getCreatedAt())
                 .build()).toList();
     }
 
-    @Transactional
-    public UserResponseDto changeRole(Long userId, Integer roleInt) {
-        if (roleInt == null || roleInt < 0 || roleInt > 2) {
-            throw new BadRequestException("roleInt must be 0, 1 or 2");
-        }
+    public long countPendingSellers() {
+        return sellerRepository.countByEnabled(false);
+    }
 
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
-        user.setRoleInt(roleInt);
-        user = userRepository.save(user);
+    public long countBuyers() {
+        return userRepository.count();
+    }
 
-        return UserResponseDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .roleInt(user.getRoleInt())
-                .role(RoleMappings.toAuthority(user.getRoleInt()))
-                .enabled(user.getEnabled())
-                .createdAt(user.getCreatedAt())
-                .build();
+    public long countSellers() {
+        return sellerRepository.count();
+    }
+
+    public long countAdmins() {
+        return adminRepository.count();
     }
 
     @Transactional
     public UserResponseDto toggleUser(Long userId, Long currentAdminId) {
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        var seller = sellerRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Seller not found with id: " + userId));
 
-        if (user.getId().equals(currentAdminId)) {
-            throw new BadRequestException("Admin cannot disable their own account");
-        }
-
-        user.setEnabled(!Boolean.TRUE.equals(user.getEnabled()));
-        user = userRepository.save(user);
+        seller.setEnabled(!Boolean.TRUE.equals(seller.getEnabled()));
+        seller = sellerRepository.save(seller);
 
         return UserResponseDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .roleInt(user.getRoleInt())
-                .role(RoleMappings.toAuthority(user.getRoleInt()))
-                .enabled(user.getEnabled())
-                .createdAt(user.getCreatedAt())
+                .id(seller.getId())
+                .name(seller.getName())
+                .email(seller.getEmail())
+                .roleInt(RoleMappings.SELLER)
+                .role("ROLE_SELLER")
+                .enabled(seller.getEnabled())
+                .createdAt(seller.getCreatedAt())
                 .build();
     }
 }

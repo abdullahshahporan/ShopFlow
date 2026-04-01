@@ -8,14 +8,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.shahporan.demo.entity.Order;
-import com.shahporan.demo.entity.OrderItem;
 import com.shahporan.demo.entity.Product;
-import com.shahporan.demo.entity.StockMovement;
+import com.shahporan.demo.entity.Seller;
+import com.shahporan.demo.entity.Stock;
 import com.shahporan.demo.entity.User;
-import com.shahporan.demo.repository.OrderItemRepository;
 import com.shahporan.demo.repository.OrderRepository;
 import com.shahporan.demo.repository.ProductRepository;
-import com.shahporan.demo.repository.StockMovementRepository;
+import com.shahporan.demo.repository.SellerRepository;
+import com.shahporan.demo.repository.StockRepository;
 import com.shahporan.demo.repository.UserRepository;
 
 @Configuration
@@ -24,13 +24,13 @@ public class DemoDataSeeder {
     @Bean
     public CommandLineRunner seedDemoData(
             UserRepository userRepository,
+                        SellerRepository sellerRepository,
             ProductRepository productRepository,
             OrderRepository orderRepository,
-            OrderItemRepository orderItemRepository,
-            StockMovementRepository stockMovementRepository) {
+            StockRepository stockRepository) {
         return args -> {
             // Get existing demo users
-            User seller = userRepository.findByEmailIgnoreCase("seller@demo.com").orElse(null);
+                        Seller seller = sellerRepository.findByEmailIgnoreCase("seller@demo.com").orElse(null);
             User buyer = userRepository.findByEmailIgnoreCase("buyer@demo.com").orElse(null);
 
             if (seller == null || buyer == null) {
@@ -39,20 +39,20 @@ public class DemoDataSeeder {
 
             // Seed products if not already seeded
             if (productRepository.count() == 0) {
-                seedProducts(seller, productRepository, stockMovementRepository);
+                                seedProducts(seller, productRepository, stockRepository);
             }
 
             // Seed orders if not already seeded
             if (orderRepository.count() == 0) {
-                seedOrders(buyer, seller, productRepository, orderRepository, orderItemRepository);
+                                seedOrders(buyer, seller, productRepository, orderRepository);
             }
         };
     }
 
     private void seedProducts(
-            User seller,
+            Seller seller,
             ProductRepository productRepository,
-            StockMovementRepository stockMovementRepository) {
+            StockRepository stockRepository) {
         
         // Create sample products
         Product laptop = Product.builder()
@@ -132,25 +132,22 @@ public class DemoDataSeeder {
                 List.of(laptop, mouse, keyboard, monitor, headphones, usb_hub, webcam, mousepad)
         );
 
-        // Create stock movements for products
+                // Create stock rows for products
         for (Product product : products) {
-            StockMovement movement = StockMovement.builder()
+                        Stock stock = Stock.builder()
                     .product(product)
                     .seller(seller)
-                    .type(StockMovement.MovementType.IN)
-                    .qty(product.getQuantity())
-                    .note("Initial stock")
+                                        .quantity(product.getQuantity())
                     .build();
-            stockMovementRepository.save(movement);
+                        stockRepository.save(stock);
         }
     }
 
     private void seedOrders(
             User buyer,
-            User seller,
+            Seller seller,
             ProductRepository productRepository,
-            OrderRepository orderRepository,
-            OrderItemRepository orderItemRepository) {
+            OrderRepository orderRepository) {
         
         // Get products
         List<Product> products = productRepository.findBySellerId(seller.getId());
@@ -158,97 +155,28 @@ public class DemoDataSeeder {
             return;
         }
 
-        // Create first order with multiple items
+        // Create first order
         Order order1 = Order.builder()
                 .buyer(buyer)
-                .status("CONFIRMED")
-                .total(BigDecimal.ZERO)
-                .build();
-
-        order1 = orderRepository.save(order1);
-
-        // Add items to order1
-        OrderItem item1 = OrderItem.builder()
-                .order(order1)
                 .product(products.get(0)) // laptop
                 .qty(1)
                 .unitPrice(products.get(0).getPrice())
+                .status("APPROVED")
+                .total(products.get(0).getPrice())
                 .build();
 
-        OrderItem item2 = OrderItem.builder()
-                .order(order1)
-                .product(products.get(1)) // mouse
-                .qty(2)
-                .unitPrice(products.get(1).getPrice())
-                .build();
-
-        OrderItem item3 = OrderItem.builder()
-                .order(order1)
-                .product(products.get(2)) // keyboard
-                .qty(1)
-                .unitPrice(products.get(2).getPrice())
-                .build();
-
-        orderItemRepository.saveAll(List.of(item1, item2, item3));
-
-        order1.setItems(List.of(item1, item2, item3));
-        BigDecimal total1 = products.get(0).getPrice()
-                .add(products.get(1).getPrice().multiply(new BigDecimal("2")))
-                .add(products.get(2).getPrice());
-        order1.setTotal(total1);
         orderRepository.save(order1);
 
         // Create second order
         Order order2 = Order.builder()
                 .buyer(buyer)
-                .status("PENDING")
-                .total(BigDecimal.ZERO)
-                .build();
-
-        order2 = orderRepository.save(order2);
-
-        OrderItem item4 = OrderItem.builder()
-                .order(order2)
                 .product(products.get(3)) // monitor
                 .qty(1)
                 .unitPrice(products.get(3).getPrice())
+                .status("PENDING")
+                .total(products.get(3).getPrice())
                 .build();
-
-        OrderItem item5 = OrderItem.builder()
-                .order(order2)
-                .product(products.get(4)) // headphones
-                .qty(1)
-                .unitPrice(products.get(4).getPrice())
-                .build();
-
-        orderItemRepository.saveAll(List.of(item4, item5));
-
-        order2.setItems(List.of(item4, item5));
-        BigDecimal total2 = products.get(3).getPrice()
-                .add(products.get(4).getPrice());
-        order2.setTotal(total2);
         orderRepository.save(order2);
 
-        // Create third order
-        Order order3 = Order.builder()
-                .buyer(buyer)
-                .status("CANCELLED")
-                .total(BigDecimal.ZERO)
-                .build();
-
-        order3 = orderRepository.save(order3);
-
-        OrderItem item6 = OrderItem.builder()
-                .order(order3)
-                .product(products.get(5)) // usb_hub
-                .qty(3)
-                .unitPrice(products.get(5).getPrice())
-                .build();
-
-        orderItemRepository.save(item6);
-
-        order3.setItems(List.of(item6));
-        order3.setTotal(products.get(5).getPrice().multiply(new BigDecimal("3")));
-        orderRepository.save(order3);
     }
 }

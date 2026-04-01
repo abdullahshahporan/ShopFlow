@@ -13,23 +13,31 @@
         </a>
 
         <!-- Buyer Links -->
-        <a sec:authorize="hasRole('BUYER')" th:href="@{/products}" class="sidebar-nav-item">
-            <i class="bi bi-grid"></i>
-            <span>Browse Products</span>
+        <a sec:authorize="hasRole('BUYER')" th:href="@{/profile}" class="sidebar-nav-item">
+            <i class="bi bi-person-circle"></i>
+            <span>My Profile</span>
         </a>
         <a sec:authorize="hasRole('BUYER')" th:href="@{/buyer/orders}" class="sidebar-nav-item">
             <i class="bi bi-bag-check"></i>
             <span>My Orders</span>
         </a>
+        <a sec:authorize="hasRole('BUYER')" th:href="@{/buyer/cart}" class="sidebar-nav-item">
+            <i class="bi bi-cart3"></i>
+            <span>My Cart</span>
+        </a>
 
         <!-- Seller Links -->
-        <a sec:authorize="hasRole('SELLER')" th:href="@{/products}" class="sidebar-nav-item">
-            <i class="bi bi-grid"></i>
-            <span>Browse Products</span>
+        <a sec:authorize="hasRole('SELLER')" th:href="@{/profile}" class="sidebar-nav-item">
+            <i class="bi bi-person-circle"></i>
+            <span>My Profile</span>
         </a>
         <a sec:authorize="hasRole('SELLER')" th:href="@{/seller/products}" class="sidebar-nav-item">
             <i class="bi bi-box-seam"></i>
             <span>My Products</span>
+        </a>
+        <a sec:authorize="hasRole('SELLER')" th:href="@{/seller/orders}" class="sidebar-nav-item">
+            <i class="bi bi-bag-check"></i>
+            <span>Order History</span>
         </a>
         <a sec:authorize="hasRole('SELLER')" th:href="@{/seller/products/new}" class="sidebar-nav-item">
             <i class="bi bi-plus-circle"></i>
@@ -37,9 +45,9 @@
         </a>
 
         <!-- Admin Links -->
-        <a sec:authorize="hasRole('ADMIN')" th:href="@{/products}" class="sidebar-nav-item">
-            <i class="bi bi-grid"></i>
-            <span>Browse Products</span>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/profile}" class="sidebar-nav-item">
+            <i class="bi bi-person-circle"></i>
+            <span>My Profile</span>
         </a>
         <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/users}" class="sidebar-nav-item">
             <i class="bi bi-people"></i>
@@ -49,10 +57,12 @@
 
     <div class="sidebar-bottom">
         <div class="sidebar-user">
-            <div class="user-avatar" th:text="${#authentication.principal.name.charAt(0).toUpperCase()}"></div>
+            <div class="user-avatar" th:text="${#authentication != null and #authentication.name != null and #authentication.name.length() > 0 ? #strings.toUpperCase(#strings.substring(#authentication.name,0,1)) : 'U'}"></div>
             <div class="user-info">
                 <div class="user-name" sec:authentication="name"></div>
-                <div class="user-role" th:text="${#authentication.principal.getAuthorities()[0].getAuthority().replace('ROLE_', '')}"></div>
+                <div class="user-role" sec:authorize="hasRole('ADMIN')">ADMIN</div>
+                <div class="user-role" sec:authorize="hasRole('SELLER')">SELLER</div>
+                <div class="user-role" sec:authorize="hasRole('BUYER')">BUYER</div>
             </div>
         </div>
         <form th:action="@{/logout}" method="post">
