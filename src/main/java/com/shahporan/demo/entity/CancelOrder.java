@@ -1,8 +1,5 @@
 package com.shahporan.demo.entity;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,33 +16,39 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "orders")
+@Table(name = "cancel_order")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Order {
+public class CancelOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "original_order_id", nullable = false, unique = true)
+    private Long originalOrderId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id", nullable = false)
     private User buyer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
-    /**
-     * PENDING, APPROVED, ON_THE_WAY, DELIVERED
-     */
     @Column(nullable = false)
     @Builder.Default
-    private String status = "PENDING";
+    private String status = "CANCELLED";
+
+    @Column(length = 500)
+    private String reason;
+
+    @Column(nullable = false, precision = 14, scale = 2)
+    @Builder.Default
+    private BigDecimal total = BigDecimal.ZERO;
 
     @Column(name = "payment_method", nullable = false)
     @Builder.Default
@@ -55,23 +58,23 @@ public class Order {
     @Builder.Default
     private String paymentStatus = "PENDING";
 
-    @Column(nullable = false, precision = 14, scale = 2)
-    private BigDecimal total;
+    @Column(name = "items_snapshot", columnDefinition = "TEXT")
+    private String itemsSnapshot;
 
-    @Column(nullable = false)
-    private Integer qty;
+    @Column(name = "order_created_at")
+    private LocalDateTime orderCreatedAt;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal unitPrice;
-
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "cancelled_at", updatable = false)
+    private LocalDateTime cancelledAt;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.cancelledAt = LocalDateTime.now();
         if (this.status == null) {
-            this.status = "PENDING";
+            this.status = "CANCELLED";
+        }
+        if (this.total == null) {
+            this.total = BigDecimal.ZERO;
         }
         if (this.paymentMethod == null) {
             this.paymentMethod = "COD";

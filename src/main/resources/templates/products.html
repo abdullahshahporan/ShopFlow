@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse Products | ShopFlow</title>
+    <title>Products | ShopFlow</title>
     <th:block th:replace="~{fragments/layout :: head}"></th:block>
 </head>
 <body>
@@ -58,7 +58,7 @@
                 </div>
                 <div class="product-name" th:text="${product.name}"></div>
                 <div class="product-sku">SKU: <span th:text="${product.sku}"></span></div>
-                <div class="product-price" th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}"></div>
+                <div class="product-price" th:text="'BDT ' + ${#numbers.formatDecimal(product.price, 1, 2)}"></div>
                 
                 <div th:if="${product.quantity > 0}" class="product-stock">
                     <span th:classappend="${product.quantity > 10} ? 'badge-success' : ${product.quantity > 0} ? 'badge-warning' : 'badge-danger'"

@@ -3,11 +3,13 @@ package com.shahporan.demo.service;
 import com.shahporan.demo.dto.ProductRequestDto;
 import com.shahporan.demo.dto.ProductResponseDto;
 import com.shahporan.demo.entity.Product;
-import com.shahporan.demo.entity.User;
+import com.shahporan.demo.entity.Seller;
+import com.shahporan.demo.entity.Stock;
 import com.shahporan.demo.exception.BadRequestException;
 import com.shahporan.demo.exception.ResourceNotFoundException;
 import com.shahporan.demo.repository.ProductRepository;
-import com.shahporan.demo.repository.UserRepository;
+import com.shahporan.demo.repository.SellerRepository;
+import com.shahporan.demo.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,8 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
+    private final SellerRepository sellerRepository;
+    private final StockRepository stockRepository;
 
     @Transactional
     public ProductResponseDto createProduct(ProductRequestDto dto, Long sellerId) {
@@ -31,7 +34,7 @@ public class ProductService {
             throw new BadRequestException("SKU already exists: " + dto.getSku());
         }
 
-        User seller = userRepository.findById(sellerId)
+        Seller seller = sellerRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Seller not found with id: " + sellerId));
 
         Product product = Product.builder()
@@ -43,7 +46,14 @@ public class ProductService {
                 .active(true)
                 .build();
 
-        return toResponse(productRepository.save(product));
+        Product savedProduct = productRepository.save(product);
+        stockRepository.save(Stock.builder()
+            .product(savedProduct)
+            .seller(seller)
+            .quantity(savedProduct.getQuantity())
+            .build());
+
+        return toResponse(savedProduct);
     }
 
     @Transactional
@@ -67,7 +77,18 @@ public class ProductService {
             product.setActive(dto.getActive());
         }
 
-        return toResponse(productRepository.save(product));
+        Product updatedProduct = productRepository.save(product);
+        Stock stock = stockRepository.findByProductId(productId)
+            .orElseGet(() -> Stock.builder()
+                .product(updatedProduct)
+                .seller(updatedProduct.getSeller())
+                .quantity(0)
+                .build());
+        stock.setSeller(updatedProduct.getSeller());
+        stock.setQuantity(updatedProduct.getQuantity());
+        stockRepository.save(stock);
+
+        return toResponse(updatedProduct);
     }
 
     @Transactional
@@ -80,16 +101,19 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    @Transactional(readOnly = true)
     public ProductResponseDto getProductById(Long productId) {
         Product product = productRepository.findByIdAndActiveTrue(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
         return toResponse(product);
     }
 
+    @Transactional(readOnly = true)
     public List<ProductResponseDto> getAllActiveProducts() {
         return productRepository.findByActiveTrue().stream().map(this::toResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ProductResponseDto> getProductsBySeller(Long sellerId) {
         return productRepository.findBySellerId(sellerId).stream().map(this::toResponse).toList();
     }
