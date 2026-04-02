@@ -107,10 +107,10 @@
                                     </td>
                                     <td>
                                         <span class="sf-badge"
-                                              th:classappend="${order.status == 'PENDING'} ? ' sf-badge-warning' :
-                                                              ${order.status == 'APPROVED'} ? ' sf-badge-info' :
-                                                              ${order.status == 'ON_THE_WAY'} ? ' sf-badge-primary' :
-                                                              ${order.status == 'DELIVERED'} ? ' sf-badge-success' : ' sf-badge-secondary'"
+                                              th:classappend="${order.status == 'PENDING' ? ' sf-badge-warning' :
+                                                              order.status == 'APPROVED' ? ' sf-badge-info' :
+                                                              order.status == 'ON_THE_WAY' ? ' sf-badge-primary' :
+                                                              order.status == 'DELIVERED' ? ' sf-badge-success' : ' sf-badge-secondary'}"
                                               th:text="${order.status}">Status</span>
                                     </td>
                                     <td class="text-end">

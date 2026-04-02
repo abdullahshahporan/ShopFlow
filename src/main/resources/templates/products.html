@@ -7,332 +7,127 @@
     <th:block th:replace="~{fragments/layout :: head}"></th:block>
 </head>
 <body>
-    <!-- Authenticated User Layout -->
-    <div sec:authorize="isAuthenticated()">
-        <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
-        <div class="sf-main-content">
-            <nav th:replace="~{fragments/navbar :: navbar(pageTitle='Product Catalog')}"></nav>
-            <div class="sf-page-content">
-                <div th:replace="~{fragments/sidebar :: alerts}"></div>
-                
-                <!-- Filters & Products Layout -->
-                <div class="row">
-                    <!-- Filter Sidebar -->
-                    <div class="col-lg-3 col-md-4 mb-4">
-                        <div class="sf-card">
-                            <div class="sf-card-header">
-                                <h5 class="mb-0"><i class="fas fa-filter"></i> Filters</h5>
-                            </div>
-                            <div class="sf-card-body">
-                                <!-- Search Box -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold">Search Products</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="product-search" placeholder="Name or SKU...">
-                                        <button class="btn sf-btn-primary-outline" type="button">
-                                            <i class="fas fa-search"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Price Range -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold">Price Range (BDT)</label>
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <input type="number" class="form-control form-control-sm" id="price-min" placeholder="Min" min="0">
-                                        </div>
-                                        <div class="col-6">
-                                            <input type="number" class="form-control form-control-sm" id="price-max" placeholder="Max" min="0">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Stock Status -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold">Stock Status</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input stock-filter" type="checkbox" value="instock" id="stock-in" checked>
-                                        <label class="form-check-label" for="stock-in">
-                                            <span class="sf-badge sf-badge-success" style="font-size: 0.75rem;">In Stock</span>
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input stock-filter" type="checkbox" value="lowstock" id="stock-low" checked>
-                                        <label class="form-check-label" for="stock-low">
-                                            <span class="sf-badge sf-badge-warning" style="font-size: 0.75rem;">Low Stock</span>
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input stock-filter" type="checkbox" value="outofstock" id="stock-out">
-                                        <label class="form-check-label" for="stock-out">
-                                            <span class="sf-badge sf-badge-danger" style="font-size: 0.75rem;">Out of Stock</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- Clear Filters -->
-                                <button class="btn sf-btn-secondary-outline w-100" id="clear-filters">
-                                    <i class="fas fa-times-circle"></i> Clear All Filters
-                                </button>
-                            </div>
-                        </div>
+    <nav th:replace="~{fragments/navbar :: publicNavbar}"></nav>
+    <div class="container py-5">
+        <div th:replace="~{fragments/sidebar :: alerts}"></div>
+        <!-- Filters & Products Layout -->
+        <div class="row">
+            <!-- Filter Sidebar -->
+            <div class="col-lg-3 col-md-4 mb-4">
+                <div class="sf-card">
+                    <div class="sf-card-header">
+                        <h5 class="mb-0"><i class="fas fa-filter"></i> Filters</h5>
                     </div>
-
-                    <!-- Products Grid Column -->
-                    <div class="col-lg-9 col-md-8">
-                        <!-- Page Header -->
-                        <div class="sf-page-header mb-4">
-                            <div>
-                                <h1 class="sf-page-title"><i class="fas fa-store"></i> Product Catalog</h1>
-                                <p class="sf-page-subtitle">Browse our collection of products</p>
-                            </div>
-                            <div sec:authorize="hasRole('SELLER')">
-                                <a th:href="@{/seller/products}" class="btn sf-btn-primary">
-                                    <i class="fas fa-boxes"></i> My Products
-                                </a>
+                    <div class="sf-card-body">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Search Products</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="product-search" placeholder="Name or SKU...">
+                                <button class="btn sf-btn-primary-outline" type="button"><i class="fas fa-search"></i></button>
                             </div>
                         </div>
-
-                        <!-- Products Grid -->
-                        <div th:if="${products != null and !products.isEmpty()}" class="row g-4" id="products-container">
-                            <div th:each="product : ${products}" 
-                                 class="col-lg-4 col-md-6 col-sm-12 product-item"
-                                 th:attr="data-name=${product.name != null ? product.name.toLowerCase() : ''},
-                                          data-sku=${product.sku != null ? product.sku.toLowerCase() : ''},
-                                          data-price=${product.price},
-                                          data-quantity=${product.quantity}">
-                                <div class="sf-product-card">
-                                    <div class="sf-product-image">
-                                        <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}" 
-                                             th:src="${product.imageUrl}" 
-                                             th:alt="${product.name}"
-                                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop';">
-                                        <img th:if="${product.imageUrl == null or product.imageUrl.isEmpty()}" 
-                                             th:src="'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop&q=80'"
-                                             th:alt="${product.name}">
-                                    </div>
-                                    <div class="sf-product-body">
-                                        <h5 class="sf-product-title" th:text="${product.name}">Product Name</h5>
-                                        <div class="sf-product-sku">
-                                            <code class="sf-sku-badge" th:text="${product.sku}">SKU-001</code>
-                                        </div>
-                                        <div class="sf-product-price" th:text="'BDT ' + ${#numbers.formatDecimal(product.price, 1, 2)}">BDT 0.00</div>
-                                        
-                                        <div class="sf-product-stock">
-                                            <span th:if="${product.quantity > 10}" class="sf-badge sf-badge-success">
-                                                <i class="fas fa-check"></i> In Stock (<span th:text="${product.quantity}">0</span>)
-                                            </span>
-                                            <span th:if="${product.quantity > 0 and product.quantity <= 10}" class="sf-badge sf-badge-warning">
-                                                <i class="fas fa-exclamation"></i> Low Stock (<span th:text="${product.quantity}">0</span>)
-                                            </span>
-                                            <span th:if="${product.quantity == 0}" class="sf-badge sf-badge-danger">
-                                                <i class="fas fa-times"></i> Out of Stock
-                                            </span>
-                                        </div>
-
-                                        <div class="sf-product-actions">
-                                            <sec:authorize access="hasRole('BUYER')">
-                                                <a th:href="@{/buyer/orders/new}" class="btn sf-btn-primary btn-sm w-100">
-                                                    <i class="fas fa-shopping-cart"></i> Order Now
-                                                </a>
-                                            </sec:authorize>
-                                            <sec:authorize access="isAnonymous()">
-                                                <a th:href="@{/login}" class="btn sf-btn-primary-outline btn-sm w-100">
-                                                    <i class="fas fa-sign-in-alt"></i> Sign In to Order
-                                                </a>
-                                            </sec:authorize>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Price Range (BDT)</label>
+                            <div class="row g-2">
+                                <div class="col-6"><input type="number" class="form-control form-control-sm" id="price-min" placeholder="Min" min="0"></div>
+                                <div class="col-6"><input type="number" class="form-control form-control-sm" id="price-max" placeholder="Max" min="0"></div>
                             </div>
                         </div>
-
-                        <!-- Empty State -->
-                        <div th:if="${products == null or products.isEmpty()}" class="sf-card">
-                            <div class="sf-card-body">
-                                <div class="sf-empty-state">
-                                    <div class="sf-empty-icon">
-                                        <i class="fas fa-boxes"></i>
-                                    </div>
-                                    <h5 class="sf-empty-title">No Products Available</h5>
-                                    <p class="sf-empty-text">There are no active products at the moment. Check back later!</p>
-                                </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Stock Status</label>
+                            <div class="form-check">
+                                <input class="form-check-input stock-filter" type="checkbox" value="instock" id="stock-in" checked>
+                                <label class="form-check-label" for="stock-in"><span class="sf-badge sf-badge-success" style="font-size:0.75rem;">In Stock</span></label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input stock-filter" type="checkbox" value="lowstock" id="stock-low" checked>
+                                <label class="form-check-label" for="stock-low"><span class="sf-badge sf-badge-warning" style="font-size:0.75rem;">Low Stock</span></label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input stock-filter" type="checkbox" value="outofstock" id="stock-out">
+                                <label class="form-check-label" for="stock-out"><span class="sf-badge sf-badge-danger" style="font-size:0.75rem;">Out of Stock</span></label>
                             </div>
                         </div>
-
-                        <!-- No Results Message (hidden by default) -->
-                        <div id="no-results-message" style="display: none;">
-                            <div class="sf-card">
-                                <div class="sf-card-body">
-                                    <div class="sf-empty-state">
-                                        <div class="sf-empty-icon">
-                                            <i class="fas fa-search"></i>
-                                        </div>
-                                        <h5 class="sf-empty-title">No Products Found</h5>
-                                        <p class="sf-empty-text">Try adjusting your filters to see more results.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <button class="btn sf-btn-secondary-outline w-100" id="clear-filters">
+                            <i class="fas fa-times-circle"></i> Clear All Filters
+                        </button>
                     </div>
                 </div>
             </div>
-            <footer th:replace="~{fragments/layout :: footer}"></footer>
-        </div>
-    </div>
-
-    <!-- Public Layout -->
-    <div sec:authorize="isAnonymous()">
-        <nav th:replace="~{fragments/navbar :: publicNavbar}"></nav>
-        <div class="container py-5">
-            <div th:replace="~{fragments/sidebar :: alerts}"></div>
-            
-            <!-- Filters & Products Layout (Public) -->
-            <div class="row">
-                <!-- Filter Sidebar -->
-                <div class="col-lg-3 col-md-4 mb-4">
-                    <div class="sf-card">
-                        <div class="sf-card-header">
-                            <h5 class="mb-0"><i class="fas fa-filter"></i> Filters</h5>
-                        </div>
-                        <div class="sf-card-body">
-                            <!-- Search Box -->
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Search Products</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="product-search-public" placeholder="Name or SKU...">
-                                    <button class="btn sf-btn-primary-outline" type="button">
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Price Range -->
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Price Range (BDT)</label>
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <input type="number" class="form-control form-control-sm" id="price-min-public" placeholder="Min" min="0">
-                                    </div>
-                                    <div class="col-6">
-                                        <input type="number" class="form-control form-control-sm" id="price-max-public" placeholder="Max" min="0">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Stock Status -->
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Stock Status</label>
-                                <div class="form-check">
-                                    <input class="form-check-input stock-filter-public" type="checkbox" value="instock" id="stock-in-public" checked>
-                                    <label class="form-check-label" for="stock-in-public">
-                                        <span class="sf-badge sf-badge-success" style="font-size: 0.75rem;">In Stock</span>
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input stock-filter-public" type="checkbox" value="lowstock" id="stock-low-public" checked>
-                                    <label class="form-check-label" for="stock-low-public">
-                                        <span class="sf-badge sf-badge-warning" style="font-size: 0.75rem;">Low Stock</span>
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input stock-filter-public" type="checkbox" value="outofstock" id="stock-out-public">
-                                    <label class="form-check-label" for="stock-out-public">
-                                        <span class="sf-badge sf-badge-danger" style="font-size: 0.75rem;">Out of Stock</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Clear Filters -->
-                            <button class="btn sf-btn-secondary-outline w-100" id="clear-filters-public">
-                                <i class="fas fa-times-circle"></i> Clear All Filters
-                            </button>
-                        </div>
+            <!-- Products Grid Column -->
+            <div class="col-lg-9 col-md-8">
+                <div class="sf-page-header mb-4">
+                    <div>
+                        <h1 class="sf-page-title"><i class="fas fa-store"></i> Product Catalog</h1>
+                        <p class="sf-page-subtitle">Browse our collection of products</p>
+                    </div>
+                    <div sec:authorize="hasRole('SELLER')">
+                        <a th:href="@{/seller/products}" class="btn sf-btn-primary"><i class="fas fa-boxes"></i> My Products</a>
                     </div>
                 </div>
-
-                <!-- Products Grid Column -->
-                <div class="col-lg-9 col-md-8">
-                    <!-- Page Header -->
-                    <div class="sf-page-header mb-4">
-                        <div>
-                            <h1 class="sf-page-title"><i class="fas fa-store"></i> Product Catalog</h1>
-                            <p class="sf-page-subtitle">Browse our collection of products</p>
-                        </div>
-                    </div>
-
-                    <!-- Products Grid -->
-                    <div th:if="${products != null and !products.isEmpty()}" class="row g-4" id="products-container-public">
-                        <div th:each="product : ${products}" 
-                             class="col-lg-4 col-md-6 col-sm-12 product-item-public"
-                             th:attr="data-name=${product.name != null ? product.name.toLowerCase() : ''},
-                                      data-sku=${product.sku != null ? product.sku.toLowerCase() : ''},
-                                      data-price=${product.price},
-                                      data-quantity=${product.quantity}">
-                            <div class="sf-product-card">
-                                <div class="sf-product-image">
-                                    <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}" 
-                                         th:src="${product.imageUrl}" 
-                                         th:alt="${product.name}"
-                                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop';">
-                                    <img th:if="${product.imageUrl == null or product.imageUrl.isEmpty()}" 
-                                         th:src="'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop&q=80'"
-                                         th:alt="${product.name}">
+                <div th:if="${products != null and !products.isEmpty()}" class="row g-4" id="products-container">
+                    <div th:each="product : ${products}"
+                         class="col-lg-4 col-md-6 col-sm-12 product-item"
+                         th:attr="data-name=${product.name != null ? product.name.toLowerCase() : ''},
+                                  data-sku=${product.sku != null ? product.sku.toLowerCase() : ''},
+                                  data-price=${product.price},
+                                  data-quantity=${product.quantity}">
+                        <div class="sf-product-card">
+                            <div class="sf-product-image">
+                                <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                                     th:src="${product.imageUrl}" th:alt="${product.name}"
+                                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop';">
+                                <img th:if="${product.imageUrl == null or product.imageUrl.isEmpty()}"
+                                     th:src="'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop&q=80'"
+                                     th:alt="${product.name}">
+                            </div>
+                            <div class="sf-product-body">
+                                <h5 class="sf-product-title" th:text="${product.name}">Product Name</h5>
+                                <div class="sf-product-sku"><code class="sf-sku-badge" th:text="${product.sku}">SKU-001</code></div>
+                                <div class="sf-product-price" th:text="'BDT ' + ${#numbers.formatDecimal(product.price, 1, 2)}">BDT 0.00</div>
+                                <div class="sf-product-stock">
+                                    <span th:if="${product.quantity > 10}" class="sf-badge sf-badge-success">
+                                        <i class="fas fa-check"></i> In Stock (<span th:text="${product.quantity}">0</span>)
+                                    </span>
+                                    <span th:if="${product.quantity > 0 and product.quantity <= 10}" class="sf-badge sf-badge-warning">
+                                        <i class="fas fa-exclamation"></i> Low Stock (<span th:text="${product.quantity}">0</span>)
+                                    </span>
+                                    <span th:if="${product.quantity == 0}" class="sf-badge sf-badge-danger">
+                                        <i class="fas fa-times"></i> Out of Stock
+                                    </span>
                                 </div>
-                                <div class="sf-product-body">
-                                    <h5 class="sf-product-title" th:text="${product.name}">Product Name</h5>
-                                    <div class="sf-product-sku">
-                                        <code class="sf-sku-badge" th:text="${product.sku}">SKU-001</code>
-                                    </div>
-                                    <div class="sf-product-price" th:text="'BDT ' + ${#numbers.formatDecimal(product.price, 1, 2)}">BDT 0.00</div>
-                                    
-                                    <div class="sf-product-stock">
-                                        <span th:if="${product.quantity > 10}" class="sf-badge sf-badge-success">
-                                            <i class="fas fa-check"></i> In Stock (<span th:text="${product.quantity}">0</span>)
-                                        </span>
-                                        <span th:if="${product.quantity > 0 and product.quantity <= 10}" class="sf-badge sf-badge-warning">
-                                            <i class="fas fa-exclamation"></i> Low Stock (<span th:text="${product.quantity}">0</span>)
-                                        </span>
-                                        <span th:if="${product.quantity == 0}" class="sf-badge sf-badge-danger">
-                                            <i class="fas fa-times"></i> Out of Stock
-                                        </span>
-                                    </div>
-
-                                    <div class="sf-product-actions">
+                                <div class="sf-product-actions">
+                                    <sec:authorize access="hasRole('BUYER')">
+                                        <a th:href="@{/buyer/orders/new}" class="btn sf-btn-primary btn-sm w-100">
+                                            <i class="fas fa-shopping-cart"></i> Order Now
+                                        </a>
+                                    </sec:authorize>
+                                    <sec:authorize access="isAnonymous()">
                                         <a th:href="@{/login}" class="btn sf-btn-primary-outline btn-sm w-100">
                                             <i class="fas fa-sign-in-alt"></i> Sign In to Order
                                         </a>
-                                    </div>
+                                    </sec:authorize>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Empty State -->
-                    <div th:if="${products == null or products.isEmpty()}" class="sf-card">
+                </div>
+                <div th:if="${products == null or products.isEmpty()}" class="sf-card">
+                    <div class="sf-card-body">
+                        <div class="sf-empty-state">
+                            <div class="sf-empty-icon"><i class="fas fa-boxes"></i></div>
+                            <h5 class="sf-empty-title">No Products Available</h5>
+                            <p class="sf-empty-text">There are no active products at the moment. Check back later!</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="no-results-message" style="display: none;">
+                    <div class="sf-card">
                         <div class="sf-card-body">
                             <div class="sf-empty-state">
-                                <div class="sf-empty-icon">
-                                    <i class="fas fa-boxes"></i>
-                                </div>
-                                <h5 class="sf-empty-title">No Products Available</h5>
-                                <p class="sf-empty-text">There are no active products at the moment. Check back later!</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- No Results Message (hidden by default) -->
-                    <div id="no-results-message-public" style="display: none;">
-                        <div class="sf-card">
-                            <div class="sf-card-body">
-                                <div class="sf-empty-state">
-                                    <div class="sf-empty-icon">
-                                        <i class="fas fa-search"></i>
-                                    </div>
-                                    <h5 class="sf-empty-title">No Products Found</h5>
-                                    <p class="sf-empty-text">Try adjusting your filters to see more results.</p>
-                                </div>
+                                <div class="sf-empty-icon"><i class="fas fa-search"></i></div>
+                                <h5 class="sf-empty-title">No Products Found</h5>
+                                <p class="sf-empty-text">Try adjusting your filters to see more results.</p>
                             </div>
                         </div>
                     </div>
@@ -342,14 +137,10 @@
         <footer th:replace="~{fragments/layout :: footer}"></footer>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/shopflow.js}"></script>
-    
-    <!-- Product Filtering Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Authenticated user filters
             const productSearch = document.getElementById('product-search');
             const stockFilters = document.querySelectorAll('.stock-filter');
             const priceMin = document.getElementById('price-min');
@@ -358,36 +149,20 @@
             const productsContainer = document.getElementById('products-container');
             const noResultsMessage = document.getElementById('no-results-message');
 
-            // Public user filters
-            const productSearchPublic = document.getElementById('product-search-public');
-            const stockFiltersPublic = document.querySelectorAll('.stock-filter-public');
-            const priceMinPublic = document.getElementById('price-min-public');
-            const priceMaxPublic = document.getElementById('price-max-public');
-            const clearFiltersPublic = document.getElementById('clear-filters-public');
-            const productsContainerPublic = document.getElementById('products-container-public');
-            const noResultsMessagePublic = document.getElementById('no-results-message-public');
-
             function filterProducts() {
                 const searchTerm = productSearch ? productSearch.value.toLowerCase() : '';
                 const minPrice = priceMin ? parseFloat(priceMin.value) || 0 : 0;
                 const maxPrice = priceMax ? parseFloat(priceMax.value) || Infinity : Infinity;
-                
-                const selectedStocks = Array.from(stockFilters)
-                    .filter(cb => cb.checked)
-                    .map(cb => cb.value);
-
+                const selectedStocks = Array.from(stockFilters).filter(cb => cb.checked).map(cb => cb.value);
                 const products = document.querySelectorAll('.product-item');
                 let visibleCount = 0;
-
                 products.forEach(product => {
                     const name = product.getAttribute('data-name') || '';
                     const sku = product.getAttribute('data-sku') || '';
                     const price = parseFloat(product.getAttribute('data-price')) || 0;
                     const quantity = parseInt(product.getAttribute('data-quantity')) || 0;
-
                     const matchesSearch = searchTerm === '' || name.includes(searchTerm) || sku.includes(searchTerm);
                     const matchesPrice = price >= minPrice && price <= maxPrice;
-
                     let matchesStock = true;
                     if (selectedStocks.length > 0) {
                         matchesStock = false;
@@ -395,80 +170,19 @@
                         if (selectedStocks.includes('lowstock') && quantity > 0 && quantity <= 10) matchesStock = true;
                         if (selectedStocks.includes('outofstock') && quantity === 0) matchesStock = true;
                     }
-
-                    if (matchesSearch && matchesPrice && matchesStock) {
-                        product.style.display = '';
-                        visibleCount++;
-                    } else {
-                        product.style.display = 'none';
-                    }
+                    product.style.display = (matchesSearch && matchesPrice && matchesStock) ? '' : 'none';
+                    if (matchesSearch && matchesPrice && matchesStock) visibleCount++;
                 });
-
                 if (productsContainer && noResultsMessage) {
-                    if (visibleCount === 0 && products.length > 0) {
-                        productsContainer.style.display = 'none';
-                        noResultsMessage.style.display = 'block';
-                    } else {
-                        productsContainer.style.display = 'flex';
-                        noResultsMessage.style.display = 'none';
-                    }
+                    const empty = visibleCount === 0 && products.length > 0;
+                    productsContainer.style.display = empty ? 'none' : 'flex';
+                    noResultsMessage.style.display = empty ? 'block' : 'none';
                 }
             }
-
-            function filterProductsPublic() {
-                const searchTerm = productSearchPublic ? productSearchPublic.value.toLowerCase() : '';
-                const minPrice = priceMinPublic ? parseFloat(priceMinPublic.value) || 0 : 0;
-                const maxPrice = priceMaxPublic ? parseFloat(priceMaxPublic.value) || Infinity : Infinity;
-                
-                const selectedStocks = Array.from(stockFiltersPublic)
-                    .filter(cb => cb.checked)
-                    .map(cb => cb.value);
-
-                const products = document.querySelectorAll('.product-item-public');
-                let visibleCount = 0;
-
-                products.forEach(product => {
-                    const name = product.getAttribute('data-name') || '';
-                    const sku = product.getAttribute('data-sku') || '';
-                    const price = parseFloat(product.getAttribute('data-price')) || 0;
-                    const quantity = parseInt(product.getAttribute('data-quantity')) || 0;
-
-                    const matchesSearch = searchTerm === '' || name.includes(searchTerm) || sku.includes(searchTerm);
-                    const matchesPrice = price >= minPrice && price <= maxPrice;
-
-                    let matchesStock = true;
-                    if (selectedStocks.length > 0) {
-                        matchesStock = false;
-                        if (selectedStocks.includes('instock') && quantity > 10) matchesStock = true;
-                        if (selectedStocks.includes('lowstock') && quantity > 0 && quantity <= 10) matchesStock = true;
-                        if (selectedStocks.includes('outofstock') && quantity === 0) matchesStock = true;
-                    }
-
-                    if (matchesSearch && matchesPrice && matchesStock) {
-                        product.style.display = '';
-                        visibleCount++;
-                    } else {
-                        product.style.display = 'none';
-                    }
-                });
-
-                if (productsContainerPublic && noResultsMessagePublic) {
-                    if (visibleCount === 0 && products.length > 0) {
-                        productsContainerPublic.style.display = 'none';
-                        noResultsMessagePublic.style.display = 'block';
-                    } else {
-                        productsContainerPublic.style.display = 'flex';
-                        noResultsMessagePublic.style.display = 'none';
-                    }
-                }
-            }
-
-            // Authenticated user event listeners
             if (productSearch) productSearch.addEventListener('input', filterProducts);
             if (priceMin) priceMin.addEventListener('input', filterProducts);
             if (priceMax) priceMax.addEventListener('input', filterProducts);
-            stockFilters.forEach(filter => filter.addEventListener('change', filterProducts));
-            
+            stockFilters.forEach(f => f.addEventListener('change', filterProducts));
             if (clearFilters) {
                 clearFilters.addEventListener('click', function() {
                     if (productSearch) productSearch.value = '';
@@ -478,27 +192,99 @@
                     filterProducts();
                 });
             }
-
-            // Public user event listeners
-            if (productSearchPublic) productSearchPublic.addEventListener('input', filterProductsPublic);
-            if (priceMinPublic) priceMinPublic.addEventListener('input', filterProductsPublic);
-            if (priceMaxPublic) priceMaxPublic.addEventListener('input', filterProductsPublic);
-            stockFiltersPublic.forEach(filter => filter.addEventListener('change', filterProductsPublic));
-            
-            if (clearFiltersPublic) {
-                clearFiltersPublic.addEventListener('click', function() {
-                    if (productSearchPublic) productSearchPublic.value = '';
-                    if (priceMinPublic) priceMinPublic.value = '';
-                    if (priceMaxPublic) priceMaxPublic.value = '';
-                    stockFiltersPublic.forEach(cb => cb.checked = (cb.value === 'instock' || cb.value === 'lowstock'));
-                    filterProductsPublic();
-                });
-            }
-
-            // Initial filter
             filterProducts();
-            filterProductsPublic();
         });
     </script>
+
+    <!-- Floating Cart Button (Buyer only) -->
+    <div sec:authorize="hasRole('BUYER')" id="floating-cart-btn">
+        <a th:href="@{/buyer/cart}" class="sf-float-cart" title="View Cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="sf-float-cart-label">My Cart</span>
+            <span class="sf-float-cart-badge"
+                  th:text="${cartCount != null and cartCount > 0 ? cartCount : ''}"
+                  th:style="${cartCount != null and cartCount > 0 ? '' : 'display:none'}">
+            </span>
+        </a>
+        <a th:href="@{/buyer/cart}" class="sf-float-checkout" title="Go to Checkout">
+            <i class="fas fa-credit-card"></i>
+            <span>Checkout</span>
+        </a>
+    </div>
+    <style>
+        #floating-cart-btn {
+            position: fixed;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 1050;
+        }
+        .sf-float-cart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            background: var(--sf-primary, #6c63ff);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 1rem;
+            padding: 0.75rem 0.875rem;
+            box-shadow: 0 4px 18px rgba(108,99,255,0.35);
+            transition: background 0.2s, transform 0.2s;
+            position: relative;
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+        .sf-float-cart:hover { background: #5a52e0; color: #fff; transform: scale(1.07); }
+        .sf-float-cart i { font-size: 1.4rem; }
+        .sf-float-cart-label { font-size: 0.7rem; line-height: 1; }
+        .sf-float-cart-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 999px;
+            min-width: 1.25rem;
+            height: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 0.3rem;
+            border: 2px solid #fff;
+        }
+        .sf-float-checkout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            background: #10b981;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 1rem;
+            padding: 0.6rem 0.875rem;
+            box-shadow: 0 4px 14px rgba(16,185,129,0.30);
+            transition: background 0.2s, transform 0.2s;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 60px;
+        }
+        .sf-float-checkout:hover { background: #059669; color: #fff; transform: scale(1.07); }
+        .sf-float-checkout i { font-size: 1rem; }
+        @media (max-width: 576px) {
+            #floating-cart-btn { right: 0.5rem; }
+            .sf-float-cart, .sf-float-checkout { min-width: 48px; padding: 0.6rem 0.6rem; }
+        }
+    </style>
 </body>
 </html>

@@ -286,24 +286,25 @@ public class OrderService {
     }
 
     private OrderResponseDto toResponse(Order order) {
-        List<OrderItemResponseDto> itemResponses = List.of(OrderItemResponseDto.builder()
-            .productId(order.getProduct().getId())
-            .productName(order.getProduct().getName())
-            .imageUrl(order.getProduct().getImageUrl())
+        Product product = order.getProduct();
+        OrderItemResponseDto itemDto = OrderItemResponseDto.builder()
+            .productId(product != null ? product.getId() : null)
+            .productName(product != null ? product.getName() : "Unknown Product")
+            .imageUrl(product != null ? product.getImageUrl() : null)
             .qty(order.getQty())
             .unitPrice(order.getUnitPrice())
-            .subtotal(order.getTotal())
-            .build());
+            .subtotal(order.getTotal() != null ? order.getTotal() : BigDecimal.ZERO)
+            .build();
 
         return OrderResponseDto.builder()
                 .id(order.getId())
                 .buyerId(order.getBuyer() != null ? order.getBuyer().getId() : null)
                 .buyerName(order.getBuyer() != null ? order.getBuyer().getName() : null)
-                .status(order.getStatus())
-            .paymentMethod(order.getPaymentMethod())
-            .paymentStatus(order.getPaymentStatus())
-                .total(order.getTotal())
-                .items(itemResponses)
+                .status(order.getStatus() != null ? order.getStatus() : "PENDING")
+                .paymentMethod(order.getPaymentMethod())
+                .paymentStatus(order.getPaymentStatus())
+                .total(order.getTotal() != null ? order.getTotal() : BigDecimal.ZERO)
+                .items(List.of(itemDto))
                 .createdAt(order.getCreatedAt())
                 .build();
     }

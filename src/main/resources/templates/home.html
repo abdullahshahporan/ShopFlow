@@ -822,5 +822,96 @@
             });
         });
     </script>
+
+    <!-- Floating Cart Button (Buyer only) -->
+    <div sec:authorize="hasRole('BUYER')" id="floating-cart-btn">
+        <a th:href="@{/buyer/cart}" class="sf-float-cart" title="View Cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="sf-float-cart-label">My Cart</span>
+            <span class="sf-float-cart-badge" id="home-cart-badge"
+                  th:text="${cartCount != null and cartCount > 0 ? cartCount : ''}"
+                  th:style="${cartCount != null and cartCount > 0 ? '' : 'display:none'}">
+            </span>
+        </a>
+        <a th:href="@{/buyer/cart}" class="sf-float-checkout" title="Go to Checkout">
+            <i class="fas fa-credit-card"></i>
+            <span>Checkout</span>
+        </a>
+    </div>
+    <style>
+        #floating-cart-btn {
+            position: fixed;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 1050;
+        }
+        .sf-float-cart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            background: var(--sf-primary, #6c63ff);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 1rem;
+            padding: 0.75rem 0.875rem;
+            box-shadow: 0 4px 18px rgba(108,99,255,0.35);
+            transition: background 0.2s, transform 0.2s;
+            position: relative;
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+        .sf-float-cart:hover { background: #5a52e0; color: #fff; transform: scale(1.07); }
+        .sf-float-cart i { font-size: 1.4rem; }
+        .sf-float-cart-label { font-size: 0.7rem; line-height: 1; }
+        .sf-float-cart-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 999px;
+            min-width: 1.25rem;
+            height: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 0.3rem;
+            border: 2px solid #fff;
+        }
+        .sf-float-checkout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            background: #10b981;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 1rem;
+            padding: 0.6rem 0.875rem;
+            box-shadow: 0 4px 14px rgba(16,185,129,0.30);
+            transition: background 0.2s, transform 0.2s;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 60px;
+        }
+        .sf-float-checkout:hover { background: #059669; color: #fff; transform: scale(1.07); }
+        .sf-float-checkout i { font-size: 1rem; }
+        @media (max-width: 576px) {
+            #floating-cart-btn { right: 0.5rem; }
+            .sf-float-cart, .sf-float-checkout { min-width: 48px; padding: 0.6rem 0.6rem; }
+        }
+    </style>
 </body>
 </html>

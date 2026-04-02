@@ -66,19 +66,19 @@
                             <tr th:each="order : ${orders}">
                                 <td><strong style="color: var(--sf-primary);">#<span th:text="${order.id}"></span></strong></td>
                                 <td><small th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'MMM dd, yyyy') : '-'}"></small></td>
-                                <td th:text="${#lists.size(order.items)} + ' item' + (${#lists.size(order.items) != 1} ? 's' : '')"></td>
+                                <td th:with="cnt=${order.items != null ? #lists.size(order.items) : 0}" th:text="${cnt} + ' item' + (${cnt != 1} ? 's' : '')"></td>
                                 <td>
                                     <div><small th:text="${order.paymentMethod}"></small></div>
                                     <div><small class="text-muted" th:text="${order.paymentStatus}"></small></div>
                                 </td>
-                                <td><strong th:text="'BDT ' + ${#numbers.formatDecimal(order.total, 1, 2)}"></strong></td>
+                                <td><strong th:text="'BDT ' + ${#numbers.formatDecimal(order.total != null ? order.total : 0, 1, 2)}"></strong></td>
                                 <td>
                                     <span class="sf-badge"
-                                          th:classappend="${order.status == 'PENDING'} ? ' sf-badge-warning' :
-                                                         ${order.status == 'APPROVED'} ? ' sf-badge-info' :
-                                                         ${order.status == 'ON_THE_WAY'} ? ' sf-badge-primary' :
-                                                         ${order.status == 'DELIVERED'} ? ' sf-badge-success' :
-                                                         ${order.status == 'FAILED'} ? ' sf-badge-danger' : ' sf-badge-secondary'"
+                                          th:classappend="${order.status == 'PENDING' ? ' sf-badge-warning' :
+                                                         order.status == 'APPROVED' ? ' sf-badge-info' :
+                                                         order.status == 'ON_THE_WAY' ? ' sf-badge-primary' :
+                                                         order.status == 'DELIVERED' ? ' sf-badge-success' :
+                                                         order.status == 'FAILED' ? ' sf-badge-danger' : ' sf-badge-secondary'}"
                                           th:text="${order.status}">Status</span>
                                 </td>
                                 <td>

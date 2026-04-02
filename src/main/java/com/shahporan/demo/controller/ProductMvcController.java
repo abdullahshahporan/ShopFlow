@@ -4,9 +4,11 @@ import com.shahporan.demo.dto.ProductRequestDto;
 import com.shahporan.demo.dto.ProductResponseDto;
 import com.shahporan.demo.security.CustomUserDetails;
 import com.shahporan.demo.service.ProductService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,8 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,9 +26,22 @@ public class ProductMvcController {
     private final ProductService productService;
 
     @GetMapping("/products")
-    public String products(Model model) {
+    public String products(Model model, Authentication authentication, HttpSession session) {
         List<ProductResponseDto> products = productService.getAllActiveProducts();
         model.addAttribute("products", products != null ? products : new ArrayList<>());
+
+        boolean isBuyer = authentication != null && authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).anyMatch("ROLE_BUYER"::equals);
+        int cartCount = 0;
+        if (isBuyer) {
+            Object rawCart = session.getAttribute("BUYER_CART");
+            if (rawCart instanceof Map<?, ?> cartMap) {
+                for (Object val : cartMap.values()) {
+                    if (val instanceof Integer qty) cartCount += Math.max(0, qty);
+                }
+            }
+        }
+        model.addAttribute("cartCount", cartCount);
         return "products";
     }
 
