@@ -495,8 +495,7 @@
                     <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}" 
                          th:src="${product.imageUrl}" 
                          th:alt="${product.name}"
-                         th:onerror="'this.onerror=null; this.src=\'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop\''">>
-                    <img th:if="${product.imageUrl == null or product.imageUrl.isEmpty()}" 
+                         th:onerror="'this.onerror=null; this.src=\'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop\''">                    <img th:if="${product.imageUrl == null or product.imageUrl.isEmpty()}" 
                          th:src="'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop&q=80'"
                          th:alt="${product.name}">
                 </div>

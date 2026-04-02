@@ -17,7 +17,13 @@
                         <h3 class="mb-0">
                             <i class="fas fa-receipt me-2"></i>Order Summary
                         </h3>
-                        <span class="sf-badge sf-badge-warning" th:text="${order.status}">Status</span>
+                        <span class="sf-badge"
+                              th:classappend="${order.status == 'PENDING'} ? ' sf-badge-warning' :
+                                             ${order.status == 'APPROVED'} ? ' sf-badge-info' :
+                                             ${order.status == 'ON_THE_WAY'} ? ' sf-badge-primary' :
+                                             ${order.status == 'DELIVERED'} ? ' sf-badge-success' :
+                                             ${order.status == 'FAILED'} ? ' sf-badge-danger' : ' sf-badge-secondary'"
+                              th:text="${order.status}">Status</span>
                     </div>
                     
                     <div class="row g-4">
@@ -141,6 +147,5 @@
     </div>
 
     <footer th:replace="~{fragments/layout :: footer}"></footer>
-    <script th:src="@{/js/shopflow.js}"></script>
 </body>
 </html>

@@ -73,6 +73,14 @@
   
   /* Transitions */
   --sf-transition:    all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Card Shadows (previously missing) */
+  --sf-card-shadow:   0 2px 12px rgba(0,0,0,0.06);
+  --sf-card-shadow-lg:0 8px 24px rgba(0,0,0,0.10);
+
+  /* Border & Background aliases */
+  --sf-border:        #e5e7eb;
+  --sf-background:    #f8fafc;
 }
 
 /* ========== Global Resets & Base Styles ========== */
@@ -443,7 +451,16 @@ body {
   transition: margin-left 0.3s ease;
 }
 
+/* sf-main-content is the actual wrapper used in templates (has sidebar offset) */
 .sf-main-content {
+  margin-left: 260px;
+  min-height: 100vh;
+  background: var(--sf-bg);
+  transition: margin-left 0.3s ease;
+}
+
+/* Inner content padding (used inside sf-main-content, after navbar) */
+.sf-page-content {
   padding: 1.5rem;
 }
 
@@ -1166,7 +1183,8 @@ body {
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
   }
   
-  .sf-main {
+  .sf-main,
+  .sf-main-content {
     margin-left: 0;
   }
   
@@ -1182,7 +1200,7 @@ body {
 }
 
 @media (max-width: 768px) {
-  .sf-main-content {
+  .sf-page-content {
     padding: 1rem;
   }
   
@@ -1263,4 +1281,231 @@ body {
 
 .fade-in-up {
   animation: fadeInUp 0.4s ease;
+}
+
+/* ============================================================
+   MISSING CLASSES — Critical Patches for Template Compatibility
+   ============================================================ */
+
+/* ── Stat Card: redesigned to match template (icon-left + content-right) ── */
+.sf-stat-card {
+  background: var(--sf-white);
+  color: var(--sf-text-primary);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  border-radius: var(--sf-radius);
+  box-shadow: var(--sf-card-shadow);
+  overflow: hidden;
+}
+.sf-stat-card::before { display: none; }
+
+.sf-stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  flex-shrink: 0;
+  opacity: 1;
+  position: static;
+}
+
+.sf-stat-content { flex: 1; }
+
+.sf-stat-label {
+  font-size: 0.8125rem;
+  color: var(--sf-text-secondary);
+  font-weight: 500;
+  opacity: 1;
+  margin-bottom: 0.25rem;
+  position: static;
+}
+
+.sf-stat-value,
+.sf-stat-number {
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: var(--sf-navy);
+  line-height: 1.2;
+  position: static;
+}
+
+/* ── Badge System ── */
+.sf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3125rem 0.625rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+.sf-badge-primary   { background: #ede9fe; color: #5b21b6; }
+.sf-badge-info      { background: #dbeafe; color: #1e40af; }
+.sf-badge-success   { background: #dcfce7; color: #166534; }
+.sf-badge-warning   { background: #fef3c7; color: #92400e; }
+.sf-badge-danger    { background: #fee2e2; color: #991b1b; }
+.sf-badge-secondary { background: #f3f4f6; color: #374151; }
+
+/* ── Button System: sf-btn-* (template naming convention) ── */
+.sf-btn-primary {
+  background: var(--sf-primary); color: var(--sf-white);
+  border: none; border-radius: var(--sf-radius-sm);
+  padding: 0.5625rem 1.25rem; font-weight: 500; font-size: 0.875rem;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  cursor: pointer; transition: all 0.2s ease; text-decoration: none;
+}
+.sf-btn-primary:hover { background: var(--sf-primary-dark); color: var(--sf-white); }
+
+.sf-btn-primary-outline {
+  background: transparent; color: var(--sf-primary);
+  border: 2px solid var(--sf-primary); border-radius: var(--sf-radius-sm);
+  padding: 0.4375rem 1.25rem; font-weight: 500; font-size: 0.875rem;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  cursor: pointer; transition: all 0.2s ease; text-decoration: none;
+}
+.sf-btn-primary-outline:hover { background: var(--sf-primary); color: var(--sf-white); }
+
+.sf-btn-secondary {
+  background: var(--sf-bg-secondary); color: var(--sf-text-primary);
+  border: none; border-radius: var(--sf-radius-sm);
+  padding: 0.5625rem 1.25rem; font-weight: 500; font-size: 0.875rem;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  cursor: pointer; transition: all 0.2s ease; text-decoration: none;
+}
+.sf-btn-secondary:hover { background: #d1d5db; color: var(--sf-text-primary); }
+
+.sf-btn-secondary-outline {
+  background: transparent; color: var(--sf-text-secondary);
+  border: 2px solid var(--sf-border-color); border-radius: var(--sf-radius-sm);
+  padding: 0.4375rem 1.25rem; font-weight: 500; font-size: 0.875rem;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  cursor: pointer; transition: all 0.2s ease; text-decoration: none;
+}
+.sf-btn-secondary-outline:hover { background: var(--sf-bg-secondary); color: var(--sf-text-primary); }
+
+.sf-btn-success {
+  background: var(--sf-success); color: var(--sf-white);
+  border: none; border-radius: var(--sf-radius-sm);
+  padding: 0.5625rem 1.25rem; font-weight: 500; font-size: 0.875rem;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  cursor: pointer; transition: all 0.2s ease; text-decoration: none;
+}
+.sf-btn-success:hover { background: #16a34a; color: var(--sf-white); }
+
+.sf-btn-danger {
+  background: var(--sf-danger); color: var(--sf-white);
+  border: none; border-radius: var(--sf-radius-sm);
+  padding: 0.5625rem 1.25rem; font-weight: 500; font-size: 0.875rem;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  cursor: pointer; transition: all 0.2s ease; text-decoration: none;
+}
+.sf-btn-danger:hover { background: #dc2626; color: var(--sf-white); }
+
+.sf-btn-danger-outline {
+  background: transparent; color: var(--sf-danger);
+  border: 2px solid var(--sf-danger); border-radius: var(--sf-radius-sm);
+  padding: 0.4375rem 1.25rem; font-weight: 500; font-size: 0.875rem;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  cursor: pointer; transition: all 0.2s ease; text-decoration: none;
+}
+.sf-btn-danger-outline:hover { background: var(--sf-danger); color: var(--sf-white); }
+
+/* ── Avatar Circle ── */
+.sf-avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sf-primary), var(--sf-accent));
+  color: var(--sf-white);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* ── Product Thumbnail ── */
+.sf-product-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--sf-bg);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.sf-product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── SKU Badge ── */
+.sf-sku-badge {
+  background: var(--sf-bg);
+  color: var(--sf-text-secondary);
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: 'Courier New', monospace;
+  border: 1px solid var(--sf-border-color);
+}
+
+/* ── Card Title ── */
+.sf-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--sf-navy);
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Empty Text (alias for sf-empty-description) ── */
+.sf-empty-text {
+  font-size: 0.875rem;
+  color: var(--sf-text-muted);
+  margin-bottom: 1rem;
+}
+
+/* ── Alert dismissible close button ── */
+.sf-alert-dismissible {
+  position: relative;
+  padding-right: 2.5rem;
+}
+.sf-alert-close {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  padding: 0;
+}
+.sf-alert-close:hover { opacity: 1; }
+
+/* ── Responsive: fix sf-page-content on mobile ── */
+@media (max-width: 768px) {
+  .sf-page-content { padding: 1rem; }
+  .sf-stat-value,
+  .sf-stat-number { font-size: 1.25rem; }
+  .sf-stat-icon { width: 50px; height: 50px; font-size: 1.25rem; }
 }
