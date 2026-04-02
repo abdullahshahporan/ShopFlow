@@ -43,6 +43,7 @@ public class ProductService {
                 .sku(dto.getSku().trim())
                 .price(dto.getPrice())
                 .quantity(dto.getQuantity())
+                .imageUrl(dto.getImageUrl() != null ? dto.getImageUrl().trim() : null)
                 .active(true)
                 .build();
 
@@ -73,6 +74,7 @@ public class ProductService {
         product.setSku(dto.getSku().trim());
         product.setPrice(dto.getPrice());
         product.setQuantity(dto.getQuantity());
+        product.setImageUrl(dto.getImageUrl() != null ? dto.getImageUrl().trim() : null);
         if (dto.getActive() != null) {
             product.setActive(dto.getActive());
         }
@@ -143,6 +145,7 @@ public class ProductService {
                 .price(product.getPrice())
                 .quantity(product.getQuantity())
                 .active(Boolean.TRUE.equals(product.getActive()))
+                .imageUrl(product.getImageUrl())
                 .createdAt(product.getCreatedAt())
                 .build();
     }

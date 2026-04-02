@@ -17,5 +17,6 @@ public class ProductResponseDto {
     BigDecimal price;
     Integer quantity;
     boolean active;
+    String imageUrl;
     LocalDateTime createdAt;
 }

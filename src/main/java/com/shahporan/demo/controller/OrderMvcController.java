@@ -27,12 +27,15 @@ public class OrderMvcController {
     public String orders(Model model, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         List<com.shahporan.demo.dto.OrderResponseDto> orders = orderService.getOrdersByBuyer(user.getId());
+        if (orders == null) {
+            orders = new ArrayList<>();
+        }
         BigDecimal totalSpent = orders.stream()
                 .map(o -> o.getTotal() == null ? BigDecimal.ZERO : o.getTotal())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         model.addAttribute("orders", orders);
-        model.addAttribute("totalSpent", totalSpent);
+        model.addAttribute("totalSpent", totalSpent != null ? totalSpent : BigDecimal.ZERO);
         return "buyer/orders";
     }
 
