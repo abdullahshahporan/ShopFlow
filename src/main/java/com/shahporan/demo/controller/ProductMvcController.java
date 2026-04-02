@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,15 +34,23 @@ public class ProductMvcController {
         boolean isBuyer = authentication != null && authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).anyMatch("ROLE_BUYER"::equals);
         int cartCount = 0;
+        Map<Long, Integer> cartQtyByProduct = new LinkedHashMap<>();
         if (isBuyer) {
             Object rawCart = session.getAttribute("BUYER_CART");
             if (rawCart instanceof Map<?, ?> cartMap) {
-                for (Object val : cartMap.values()) {
-                    if (val instanceof Integer qty) cartCount += Math.max(0, qty);
+                for (Map.Entry<?, ?> entry : cartMap.entrySet()) {
+                    if (entry.getKey() instanceof Long pid && entry.getValue() instanceof Integer qty) {
+                        int safeQty = Math.max(0, qty);
+                        cartQtyByProduct.put(pid, safeQty);
+                        cartCount += safeQty;
+                    }
                 }
             }
         }
         model.addAttribute("cartCount", cartCount);
+        model.addAttribute("isBuyer", isBuyer);
+        model.addAttribute("isAuthenticated", authentication != null && authentication.isAuthenticated());
+        model.addAttribute("cartQtyByProduct", cartQtyByProduct);
         return "products";
     }
 

@@ -294,6 +294,10 @@ public class CartMvcController {
         if ("cart".equalsIgnoreCase(returnTo)) {
             return "/buyer/cart";
         }
+        // Allow safe same-origin relative paths
+        if (returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+            return returnTo;
+        }
         return defaultTarget;
     }
 }

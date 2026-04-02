@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>Products | ShopFlow</title>
     <th:block th:replace="~{fragments/layout :: head}"></th:block>
 </head>
@@ -66,14 +68,17 @@
                     </div>
                 </div>
                 <div th:if="${products != null and !products.isEmpty()}" class="row g-4" id="products-container">
-                    <div th:each="product : ${products}"
+                    <div th:each="product, iterStat : ${products}"
                          class="col-lg-4 col-md-6 col-sm-12 product-item"
                          th:attr="data-name=${product.name != null ? product.name.toLowerCase() : ''},
                                   data-sku=${product.sku != null ? product.sku.toLowerCase() : ''},
                                   data-price=${product.price},
                                   data-quantity=${product.quantity}">
-                        <div class="sf-product-card">
-                            <div class="sf-product-image">
+                        <div class="sf-home-product-card">
+                            <div class="sf-home-product-image">
+                                <span class="sf-product-badge sf-badge-hot" th:if="${iterStat.index < 3}">HOT</span>
+                                <span class="sf-product-badge sf-badge-sale" th:if="${iterStat.index >= 3 and iterStat.index < 6}">SALE</span>
+                                <span class="sf-product-badge sf-badge-new" th:if="${iterStat.index >= 6}">NEW</span>
                                 <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
                                      th:src="${product.imageUrl}" th:alt="${product.name}"
                                      onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop';">
@@ -81,32 +86,49 @@
                                      th:src="'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop&q=80'"
                                      th:alt="${product.name}">
                             </div>
-                            <div class="sf-product-body">
-                                <h5 class="sf-product-title" th:text="${product.name}">Product Name</h5>
-                                <div class="sf-product-sku"><code class="sf-sku-badge" th:text="${product.sku}">SKU-001</code></div>
-                                <div class="sf-product-price" th:text="'BDT ' + ${#numbers.formatDecimal(product.price, 1, 2)}">BDT 0.00</div>
-                                <div class="sf-product-stock">
-                                    <span th:if="${product.quantity > 10}" class="sf-badge sf-badge-success">
-                                        <i class="fas fa-check"></i> In Stock (<span th:text="${product.quantity}">0</span>)
-                                    </span>
-                                    <span th:if="${product.quantity > 0 and product.quantity <= 10}" class="sf-badge sf-badge-warning">
-                                        <i class="fas fa-exclamation"></i> Low Stock (<span th:text="${product.quantity}">0</span>)
-                                    </span>
-                                    <span th:if="${product.quantity == 0}" class="sf-badge sf-badge-danger">
-                                        <i class="fas fa-times"></i> Out of Stock
-                                    </span>
+                            <div class="sf-home-product-body">
+                                <h3 class="sf-home-product-title" th:text="${product.name}">Product Name</h3>
+                                <div class="sf-home-product-price" th:text="'BDT ' + ${#numbers.formatDecimal(product.price, 1, 2)}">BDT 0.00</div>
+                                <div class="sf-home-product-meta">
+                                    <i class="fas fa-store"></i>
+                                    <span th:text="${product.sellerName != null ? product.sellerName : 'Unknown'}">Seller</span>
+                                    <span class="mx-1">•</span>
+                                    <span class="sf-badge sf-badge-success" th:if="${product.quantity > 10}" style="font-size:0.7rem;"><i class="fas fa-check"></i> In Stock</span>
+                                    <span class="sf-badge sf-badge-warning" th:if="${product.quantity > 0 and product.quantity <= 10}" style="font-size:0.7rem;"><i class="fas fa-exclamation"></i> Low Stock</span>
+                                    <span class="sf-badge sf-badge-danger" th:if="${product.quantity == 0}" style="font-size:0.7rem;"><i class="fas fa-times"></i> Out of Stock</span>
                                 </div>
-                                <div class="sf-product-actions">
-                                    <sec:authorize access="hasRole('BUYER')">
-                                        <a th:href="@{/buyer/orders/new}" class="btn sf-btn-primary btn-sm w-100">
-                                            <i class="fas fa-shopping-cart"></i> Order Now
-                                        </a>
-                                    </sec:authorize>
-                                    <sec:authorize access="isAnonymous()">
-                                        <a th:href="@{/login}" class="btn sf-btn-primary-outline btn-sm w-100">
-                                            <i class="fas fa-sign-in-alt"></i> Sign In to Order
-                                        </a>
-                                    </sec:authorize>
+                                <!-- Buyer cart controls (server-side initialized for refresh safety) -->
+                                <div class="mt-3" th:if="${isBuyer}"
+                                     th:with="currentQty=${cartQtyByProduct != null and cartQtyByProduct[product.id] != null ? cartQtyByProduct[product.id] : 0}"
+                                     th:attr="data-product-id=${product.id},data-stock=${product.quantity != null ? product.quantity : 0}">
+                                    <form class="home-cart-add-form" th:action="@{/buyer/cart/api/add}" method="post"
+                                          th:style="${currentQty > 0} ? 'display:none; margin:0;' : 'display:block; margin:0;'">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <input type="hidden" name="productId" th:value="${product.id}">
+                                        <input type="hidden" name="qty" value="1">
+                                        <button type="submit" class="btn sf-btn-primary w-100" th:disabled="${product.quantity == 0}">
+                                            <i class="fas fa-cart-plus"></i> Add to Cart
+                                        </button>
+                                    </form>
+                                    <form class="home-cart-qty-form" th:action="@{/buyer/cart/api/update}" method="post"
+                                          th:style="${currentQty > 0} ? 'display:block; margin:0;' : 'display:none; margin:0;'">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <input type="hidden" name="productId" th:value="${product.id}">
+                                        <div class="d-flex justify-content-center">
+                                            <div class="sf-cart-qty-control">
+                                                <button type="button" class="home-cart-update-btn" data-action="dec"><i class="fas fa-minus"></i></button>
+                                                <span class="home-cart-current-qty" th:text="${currentQty > 0 ? currentQty : 1}">1</span>
+                                                <button type="button" class="home-cart-update-btn" data-action="inc"
+                                                        th:disabled="${product.quantity != null and currentQty >= product.quantity}"><i class="fas fa-plus"></i></button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <!-- Guest sign-in prompt -->
+                                <div class="mt-3" th:if="${!isAuthenticated}">
+                                    <a th:href="@{/login}" class="btn sf-btn-primary-outline w-100">
+                                        <i class="fas fa-sign-in-alt"></i> Sign In to Order
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -193,6 +215,69 @@
                 });
             }
             filterProducts();
+
+            // ── Cart interactions (same pattern as home page) ──
+            function getCsrf() {
+                const token  = document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || '';
+                const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+                return { token, header };
+            }
+
+            function updateBadge(count) {
+                const badge = document.querySelector('.sf-float-cart-badge');
+                if (!badge) return;
+                if (count > 0) { badge.textContent = count; badge.style.display = 'inline-flex'; }
+                else { badge.textContent = ''; badge.style.display = 'none'; }
+            }
+
+            function syncCardState(row, qty) {
+                const addForm  = row.querySelector('.home-cart-add-form');
+                const qtyForm  = row.querySelector('.home-cart-qty-form');
+                const qtyText  = row.querySelector('.home-cart-current-qty');
+                const incBtn   = row.querySelector('.home-cart-update-btn[data-action="inc"]');
+                const stock    = Number(row.getAttribute('data-stock') || '0');
+                const safeQty  = Number(qty || 0);
+                if (safeQty > 0) {
+                    if (addForm) addForm.style.display = 'none';
+                    if (qtyForm) qtyForm.style.display = 'block';
+                    if (qtyText) qtyText.textContent = safeQty;
+                    if (incBtn)  incBtn.disabled = stock > 0 ? safeQty >= stock : true;
+                } else {
+                    if (addForm) addForm.style.display = 'block';
+                    if (qtyForm) qtyForm.style.display = 'none';
+                }
+            }
+
+            async function postCart(url, params) {
+                const csrf = getCsrf();
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', [csrf.header]: csrf.token },
+                    body: new URLSearchParams(params).toString(),
+                    credentials: 'same-origin'
+                });
+                return res.json().catch(() => ({ success: false }));
+            }
+
+            document.querySelectorAll('.home-cart-add-form').forEach(form => {
+                form.addEventListener('submit', async e => {
+                    e.preventDefault();
+                    const row = form.closest('[data-product-id]');
+                    const productId = form.querySelector('input[name="productId"]').value;
+                    const data = await postCart('/buyer/cart/api/add', { productId, qty: '1' });
+                    if (data.success) { syncCardState(row, data.productQty); updateBadge(data.cartCount); }
+                });
+            });
+
+            document.querySelectorAll('.home-cart-update-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const row = btn.closest('[data-product-id]');
+                    const productId = row.querySelector('input[name="productId"]').value;
+                    const action = btn.getAttribute('data-action');
+                    const data = await postCart('/buyer/cart/api/update', { productId, action });
+                    if (data.success) { syncCardState(row, data.productQty); updateBadge(data.cartCount); }
+                });
+            });
         });
     </script>
 
@@ -206,85 +291,6 @@
                   th:style="${cartCount != null and cartCount > 0 ? '' : 'display:none'}">
             </span>
         </a>
-        <a th:href="@{/buyer/cart}" class="sf-float-checkout" title="Go to Checkout">
-            <i class="fas fa-credit-card"></i>
-            <span>Checkout</span>
-        </a>
     </div>
-    <style>
-        #floating-cart-btn {
-            position: fixed;
-            right: 1.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            z-index: 1050;
-        }
-        .sf-float-cart {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-            background: var(--sf-primary, #6c63ff);
-            color: #fff;
-            text-decoration: none;
-            border-radius: 1rem;
-            padding: 0.75rem 0.875rem;
-            box-shadow: 0 4px 18px rgba(108,99,255,0.35);
-            transition: background 0.2s, transform 0.2s;
-            position: relative;
-            font-size: 0.8rem;
-            font-weight: 600;
-            min-width: 60px;
-            text-align: center;
-        }
-        .sf-float-cart:hover { background: #5a52e0; color: #fff; transform: scale(1.07); }
-        .sf-float-cart i { font-size: 1.4rem; }
-        .sf-float-cart-label { font-size: 0.7rem; line-height: 1; }
-        .sf-float-cart-badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #ef4444;
-            color: #fff;
-            font-size: 0.7rem;
-            font-weight: 700;
-            border-radius: 999px;
-            min-width: 1.25rem;
-            height: 1.25rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 0.3rem;
-            border: 2px solid #fff;
-        }
-        .sf-float-checkout {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-            background: #10b981;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 1rem;
-            padding: 0.6rem 0.875rem;
-            box-shadow: 0 4px 14px rgba(16,185,129,0.30);
-            transition: background 0.2s, transform 0.2s;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-align: center;
-            min-width: 60px;
-        }
-        .sf-float-checkout:hover { background: #059669; color: #fff; transform: scale(1.07); }
-        .sf-float-checkout i { font-size: 1rem; }
-        @media (max-width: 576px) {
-            #floating-cart-btn { right: 0.5rem; }
-            .sf-float-cart, .sf-float-checkout { min-width: 48px; padding: 0.6rem 0.6rem; }
-        }
-    </style>
 </body>
 </html>
