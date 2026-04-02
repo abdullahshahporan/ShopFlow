@@ -55,6 +55,9 @@ public class Product {
     @Builder.Default
     private Boolean active = true;
 
+    @Column(length = 500)
+    private String imageUrl;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 

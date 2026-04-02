@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/layout :: head}"></th:block>
-    <title>Access Denied | ShopFlow</title>
+    <title>Error | ShopFlow</title>
 </head>
 <body>
     <nav th:replace="~{fragments/navbar :: publicNavbar}"></nav>
@@ -10,17 +10,17 @@
     <main class="d-flex align-items-center justify-content-center" style="min-height: 70vh; padding: 40px 20px;">
         <div class="sf-empty-state" style="max-width: 600px;">
             <div class="sf-empty-icon" style="color: var(--sf-danger);">
-                <i class="fas fa-shield-alt"></i>
+                <i class="fas fa-times-circle"></i>
             </div>
-            <h1 style="font-size: 3rem; color: var(--sf-muted); margin: 0 0 1rem 0; font-weight: 700;">403</h1>
-            <h2 style="margin-bottom: 1rem;">Access Denied</h2>
-            <p>You don't have permission to access this page. If you believe this is an error, please contact support.</p>
+            <h1 style="font-size: 3rem; color: var(--sf-muted); margin: 0 0 1rem 0; font-weight: 700;" th:text="${status}">Error</h1>
+            <h2 style="margin-bottom: 1rem;">An Error Occurred</h2>
+            <p th:text="${message != null ? message : 'An unexpected error occurred. Please try again or contact support if the problem persists.'}">Error message</p>
             <div class="mt-4" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
                 <a th:href="@{/}" class="btn sf-btn-primary">
                     <i class="fas fa-home"></i> Go Home
                 </a>
-                <a th:href="@{/profile}" class="btn sf-btn-secondary">
-                    <i class="fas fa-user"></i> My Profile
+                <a href="javascript:history.back()" class="btn sf-btn-secondary-outline">
+                    <i class="fas fa-arrow-left"></i> Go Back
                 </a>
             </div>
         </div>

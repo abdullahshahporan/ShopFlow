@@ -47,12 +47,20 @@ public class SecurityConfig {
                                                 .successHandler((request, response, authentication) -> {
                                                         String redirectUrl = "/";
 
-                                                        if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))) {
-                                                                redirectUrl = "/admin/users";
-                                                        } else if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_SELLER".equals(a.getAuthority()))) {
-                                                                redirectUrl = "/seller/products";
-                                                        } else if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_BUYER".equals(a.getAuthority()))) {
-                                                                redirectUrl = "/buyer/orders";
+                                                        try {
+                                                                if (authentication != null && authentication.getAuthorities() != null) {
+                                                                        if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))) {
+                                                                                redirectUrl = "/admin/users";
+                                                                        } else if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_SELLER".equals(a.getAuthority()))) {
+                                                                                redirectUrl = "/seller/products";
+                                                                        } else if (authentication.getAuthorities().stream().anyMatch(a -> "ROLE_BUYER".equals(a.getAuthority()))) {
+                                                                                redirectUrl = "/buyer/orders";
+                                                                        }
+                                                                }
+                                                        } catch (Exception e) {
+                                                                // Log the error and redirect to home page as fallback
+                                                                System.err.println("Error in authentication success handler: " + e.getMessage());
+                                                                e.printStackTrace();
                                                         }
 
                                                         response.sendRedirect(request.getContextPath() + redirectUrl);

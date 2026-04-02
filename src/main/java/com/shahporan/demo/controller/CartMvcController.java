@@ -34,6 +34,7 @@ public class CartMvcController {
 
     @GetMapping("/buyer/cart")
     public String cart(Model model, HttpSession session) {
+        // Ensure session cart exists
         Map<Long, Integer> cart = getCart(session);
 
         List<CartLineView> lines = new ArrayList<>();
