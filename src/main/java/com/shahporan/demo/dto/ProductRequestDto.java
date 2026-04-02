@@ -29,4 +29,7 @@ public class ProductRequestDto {
 
     // Used by seller edit form; ignored when null.
     private Boolean active;
+
+    // Optional image URL from online sources
+    private String imageUrl;
 }

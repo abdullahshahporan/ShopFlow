@@ -289,6 +289,7 @@ public class OrderService {
         List<OrderItemResponseDto> itemResponses = List.of(OrderItemResponseDto.builder()
             .productId(order.getProduct().getId())
             .productName(order.getProduct().getName())
+            .imageUrl(order.getProduct().getImageUrl())
             .qty(order.getQty())
             .unitPrice(order.getUnitPrice())
             .subtotal(order.getTotal())

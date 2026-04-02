@@ -13,6 +13,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import java.util.List;
 
 @Controller
@@ -23,7 +26,8 @@ public class ProductMvcController {
 
     @GetMapping("/products")
     public String products(Model model) {
-        model.addAttribute("products", productService.getAllActiveProducts());
+        List<ProductResponseDto> products = productService.getAllActiveProducts();
+        model.addAttribute("products", products != null ? products : new ArrayList<>());
         return "products";
     }
 
