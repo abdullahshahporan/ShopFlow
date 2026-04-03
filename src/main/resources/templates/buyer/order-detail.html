@@ -17,7 +17,13 @@
                         <h3 class="mb-0">
                             <i class="fas fa-receipt me-2"></i>Order Summary
                         </h3>
-                        <span class="sf-badge sf-badge-warning" th:text="${order.status}">Status</span>
+                        <span class="sf-badge"
+                              th:classappend="${order.status == 'PENDING' ? ' sf-badge-warning' :
+                                             order.status == 'APPROVED' ? ' sf-badge-info' :
+                                             order.status == 'ON_THE_WAY' ? ' sf-badge-primary' :
+                                             order.status == 'DELIVERED' ? ' sf-badge-success' :
+                                             order.status == 'FAILED' ? ' sf-badge-danger' : ' sf-badge-secondary'}"
+                              th:text="${order.status}">Status</span>
                     </div>
                     
                     <div class="row g-4">
@@ -29,7 +35,7 @@
                         </div>
                         <div class="col-md-4 col-6">
                             <small class="text-muted text-uppercase d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">Order Date</small>
-                            <div style="font-size: 1rem; font-weight: 600;" th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy | hh:mm a')}">Date</div>
+                            <div style="font-size: 1rem; font-weight: 600;" th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'MMM dd, yyyy | hh:mm a') : '-'}">Date</div>
                         </div>
                         <div class="col-md-4 col-6">
                             <small class="text-muted text-uppercase d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">Payment Method</small>
@@ -44,7 +50,7 @@
                         </div>
                         <div class="col-md-4 col-6">
                             <small class="text-muted text-uppercase d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">Order Total</small>
-                            <div style="font-size: 1.75rem; font-weight: 700; color: var(--sf-success);" th:text="'BDT ' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">BDT 0.00</div>
+                            <div style="font-size: 1.75rem; font-weight: 700; color: var(--sf-success);" th:text="'BDT ' + ${#numbers.formatDecimal(order.total != null ? order.total : 0, 1, 'COMMA', 2, 'POINT')}">BDT 0.00</div>
                         </div>
                     </div>
                 </div>
@@ -91,10 +97,10 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <strong th:text="'BDT ' + ${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT')}">BDT 0</strong>
+                                        <strong th:text="'BDT ' + ${#numbers.formatDecimal(item.unitPrice != null ? item.unitPrice : 0, 1, 'COMMA', 2, 'POINT')}">BDT 0</strong>
                                     </td>
                                     <td class="text-end">
-                                        <strong style="color: var(--sf-primary); font-size: 1rem;" th:text="'BDT ' + ${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">BDT 0</strong>
+                                        <strong style="color: var(--sf-primary); font-size: 1rem;" th:text="'BDT ' + ${#numbers.formatDecimal(item.subtotal != null ? item.subtotal : 0, 1, 'COMMA', 2, 'POINT')}">BDT 0</strong>
                                     </td>
                                 </tr>
                             </tbody>
@@ -105,7 +111,7 @@
                     <div class="mt-4 p-4" style="background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%); border-radius: 12px;">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="text-muted">Subtotal</span>
-                            <strong th:text="'BDT ' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">BDT 0</strong>
+                            <strong th:text="'BDT ' + ${#numbers.formatDecimal(order.total != null ? order.total : 0, 1, 'COMMA', 2, 'POINT')}">BDT 0</strong>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="text-muted">Shipping</span>
@@ -114,7 +120,7 @@
                         <hr style="margin: 16px 0 24px;">
                         <div class="d-flex justify-content-between align-items-center">
                             <strong style="font-size: 1.25rem;">Grand Total</strong>
-                            <strong style="font-size: 2rem; font-weight: 700; color: var(--sf-primary);" th:text="'BDT ' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">BDT 0.00</strong>
+                            <strong style="font-size: 2rem; font-weight: 700; color: var(--sf-primary);" th:text="'BDT ' + ${#numbers.formatDecimal(order.total != null ? order.total : 0, 1, 'COMMA', 2, 'POINT')}">BDT 0.00</strong>
                         </div>
                     </div>
                 </div>
@@ -141,6 +147,5 @@
     </div>
 
     <footer th:replace="~{fragments/layout :: footer}"></footer>
-    <script th:src="@{/js/shopflow.js}"></script>
 </body>
 </html>

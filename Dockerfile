@@ -62,7 +62,7 @@ EXPOSE 8080
 
 # Health check (checks if app is responding)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
+  CMD curl -f http://localhost:8080/login || exit 1
 
 # JVM Options for Production
 ENV JAVA_OPTS="\

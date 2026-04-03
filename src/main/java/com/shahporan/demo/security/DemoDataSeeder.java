@@ -54,13 +54,12 @@ public class DemoDataSeeder {
             ProductRepository productRepository,
             StockRepository stockRepository) {
         
-        // Create sample products
+        // Create sample products (no quantity here — Stock is the source of truth)
         Product laptop = Product.builder()
                 .seller(seller)
                 .name("Dell XPS 13")
                 .sku("DELL-XPS-13-001")
                 .price(new BigDecimal("999.99"))
-                .quantity(15)
                 .active(true)
                 .build();
 
@@ -69,7 +68,6 @@ public class DemoDataSeeder {
                 .name("Logitech MX Master 3")
                 .sku("LOG-MX-MASTER-3")
                 .price(new BigDecimal("99.99"))
-                .quantity(50)
                 .active(true)
                 .build();
 
@@ -78,7 +76,6 @@ public class DemoDataSeeder {
                 .name("Mechanical Keyboard RGB")
                 .sku("MECH-KB-RGB-001")
                 .price(new BigDecimal("129.99"))
-                .quantity(30)
                 .active(true)
                 .build();
 
@@ -87,7 +84,6 @@ public class DemoDataSeeder {
                 .name("LG UltraWide Monitor 34\"")
                 .sku("LG-ULTRA-34")
                 .price(new BigDecimal("499.99"))
-                .quantity(10)
                 .active(true)
                 .build();
 
@@ -96,7 +92,6 @@ public class DemoDataSeeder {
                 .name("Sony WH-1000XM5 Headphones")
                 .sku("SONY-WH-1000XM5")
                 .price(new BigDecimal("349.99"))
-                .quantity(25)
                 .active(true)
                 .build();
 
@@ -105,7 +100,6 @@ public class DemoDataSeeder {
                 .name("USB-C Hub 7-in-1")
                 .sku("USB-HUB-7-001")
                 .price(new BigDecimal("49.99"))
-                .quantity(40)
                 .active(true)
                 .build();
 
@@ -114,7 +108,6 @@ public class DemoDataSeeder {
                 .name("Logitech 4K Webcam")
                 .sku("LOG-4K-CAM-001")
                 .price(new BigDecimal("79.99"))
-                .quantity(20)
                 .active(true)
                 .build();
 
@@ -123,7 +116,6 @@ public class DemoDataSeeder {
                 .name("Extended Gaming Mousepad")
                 .sku("GAME-PAD-EXT-001")
                 .price(new BigDecimal("24.99"))
-                .quantity(60)
                 .active(true)
                 .build();
 
@@ -132,14 +124,15 @@ public class DemoDataSeeder {
                 List.of(laptop, mouse, keyboard, monitor, headphones, usb_hub, webcam, mousepad)
         );
 
-                // Create stock rows for products
-        for (Product product : products) {
-                        Stock stock = Stock.builder()
-                    .product(product)
+        // Create stock rows — quantity tracked here, not in products
+        int[] initialQty = {15, 50, 30, 10, 25, 40, 20, 60};
+        for (int i = 0; i < products.size(); i++) {
+            Stock stock = Stock.builder()
+                    .product(products.get(i))
                     .seller(seller)
-                                        .quantity(product.getQuantity())
+                    .quantity(initialQty[i])
                     .build();
-                        stockRepository.save(stock);
+            stockRepository.save(stock);
         }
     }
 
