@@ -37,14 +37,14 @@ class CartMvcControllerIntegrationTest {
     void cartPage_asAuthenticatedBuyer_loadsSuccessfully() throws Exception {
         mockMvc.perform(get("/buyer/cart"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("buyer/cart-redesigned"));
+                .andExpect(view().name("buyer/cart"));
     }
 
     // INTEGRATION TEST 18
     @Test
     @WithMockUser(username = "buyer@test.com", roles = {"BUYER"})
     void orderFormPage_asAuthenticatedBuyer_loadsSuccessfully() throws Exception {
-        mockMvc.perform(get("/buyer/order-form"))
+        mockMvc.perform(get("/buyer/orders/new"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("buyer/order-form"));
     }
@@ -62,6 +62,6 @@ class CartMvcControllerIntegrationTest {
     void cartPage_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/buyer/cart"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login"));
+                .andExpect(redirectedUrl("/login"));
     }
 }

@@ -47,7 +47,7 @@ class AuthControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("register"))
                 .andExpect(model().attributeExists("registerRequest"))
-                .andExpect(model().attribute("role", "BUYER"));
+                .andExpect(model().attribute("accountType", "BUYER"));
     }
 
     // INTEGRATION TEST 3
@@ -57,7 +57,7 @@ class AuthControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("register"))
                 .andExpect(model().attributeExists("registerRequest"))
-                .andExpect(model().attribute("role", "SELLER"));
+                .andExpect(model().attribute("accountType", "SELLER"));
     }
 
     // INTEGRATION TEST 4
@@ -70,7 +70,7 @@ class AuthControllerIntegrationTest {
                         .param("confirmPassword", "password123")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?registered"));
+                .andExpect(redirectedUrl("/login?registeredBuyer"));
     }
 
     // INTEGRATION TEST 5
@@ -84,7 +84,7 @@ class AuthControllerIntegrationTest {
                         .param("businessName", "Test Business")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?registered"));
+                .andExpect(redirectedUrl("/login?sellerPending"));
     }
 
     // INTEGRATION TEST 6
