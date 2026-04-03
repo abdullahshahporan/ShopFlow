@@ -49,10 +49,6 @@ public class Product {
 
     @Column(nullable = false)
     @Builder.Default
-    private Integer quantity = 0;
-
-    @Column(nullable = false)
-    @Builder.Default
     private Boolean active = true;
 
     @Column(length = 500)
@@ -64,14 +60,19 @@ public class Product {
     @OneToOne(mappedBy = "product")
     private Stock stock;
 
+    /**
+     * Returns the current stock quantity tracked by the Stock table.
+     * Product catalog info (name, price, SKU) lives here; quantity lives in Stock.
+     */
+    public Integer getQuantity() {
+        return stock != null ? stock.getQuantity() : 0;
+    }
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         if (this.active == null) {
             this.active = true;
-        }
-        if (this.quantity == null) {
-            this.quantity = 0;
         }
     }
 }

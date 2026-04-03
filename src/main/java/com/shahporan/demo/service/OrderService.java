@@ -76,7 +76,6 @@ public class OrderService {
 
             int remainingQty = stock.getQuantity() - qty;
             stock.setQuantity(remainingQty);
-            product.setQuantity(remainingQty);
             touchedStocks.add(stock);
 
             Order order = Order.builder()
@@ -93,7 +92,6 @@ public class OrderService {
         }
 
         stockRepository.saveAll(touchedStocks);
-        productRepository.saveAll(productsById.values());
 
         return toResponse(createdOrders.get(0));
     }
@@ -116,13 +114,11 @@ public class OrderService {
             .orElseGet(() -> stockRepository.save(Stock.builder()
                 .product(product)
                 .seller(product.getSeller())
-                .quantity(product.getQuantity() == null ? 0 : product.getQuantity())
+                .quantity(0)
                 .build()));
         int restoredQty = (stock.getQuantity() == null ? 0 : stock.getQuantity()) + order.getQty();
         stock.setQuantity(restoredQty);
-        product.setQuantity(restoredQty);
         stockRepository.save(stock);
-        productRepository.save(product);
 
         CancelOrder cancelOrder = CancelOrder.builder()
                 .originalOrderId(order.getId())
@@ -238,10 +234,6 @@ public class OrderService {
             if (!Boolean.TRUE.equals(product.getActive())) {
                 throw new BadRequestException("Product is inactive: " + product.getName());
             }
-
-            if (product.getQuantity() == null || product.getQuantity() < requestedQty) {
-                throw new BadRequestException("Insufficient stock for product: " + product.getName());
-            }
         }
 
         return productsById;
@@ -262,7 +254,7 @@ public class OrderService {
                 stock = stockRepository.save(Stock.builder()
                         .product(product)
                         .seller(product.getSeller())
-                        .quantity(product.getQuantity() == null ? 0 : product.getQuantity())
+                        .quantity(0)
                         .build());
                 stockByProductId.put(productId, stock);
             }
