@@ -40,6 +40,7 @@ jobs:
             test
             chore
           requireScope: false
+          titleCaseInsensitive: true
           
   code-quality:
     name: Code Quality Check
@@ -58,6 +59,9 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+        
       - name: Run Checkstyle
         run: ./mvnw checkstyle:check
         continue-on-error: false
@@ -123,6 +127,9 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+        
       - name: Build with Maven
         run: ./mvnw clean install -DskipTests
         
