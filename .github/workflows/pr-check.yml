@@ -220,6 +220,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate-pr, code-quality, security-scan, build-and-test, javadoc-validation]
     if: always()
+    permissions:
+      issues: write
+      pull-requests: write
     
     steps:
       - name: PR Check Summary
@@ -241,7 +244,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const prNumber = context.issue.number;
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: prNumber,
               owner: context.repo.owner,
               repo: context.repo.repo,

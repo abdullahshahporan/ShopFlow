@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,7 @@ class OrderMvcControllerIntegrationTest {
 
     // INTEGRATION TEST 21
     @Test
-    @WithMockUser(username = "buyer@test.com", roles = {"BUYER"})
+    @WithUserDetails("buyer@demo.com")
     void buyerOrdersPage_asAuthenticatedBuyer_loadsSuccessfully() throws Exception {
         mockMvc.perform(get("/buyer/orders"))
                 .andExpect(status().isOk())
@@ -43,11 +44,11 @@ class OrderMvcControllerIntegrationTest {
 
     // INTEGRATION TEST 22
     @Test
-    @WithMockUser(username = "seller@test.com", roles = {"SELLER"})
+    @WithUserDetails("seller@demo.com")
     void sellerOrdersPage_asAuthenticatedSeller_loadsSuccessfully() throws Exception {
         mockMvc.perform(get("/seller/orders"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("orders"))
+                .andExpect(model().attributeExists("sellerOrders"))
                 .andExpect(view().name("seller/orders"));
     }
 
@@ -64,6 +65,6 @@ class OrderMvcControllerIntegrationTest {
     void buyerOrdersPage_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/buyer/orders"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login"));
+                .andExpect(redirectedUrl("/login"));
     }
 }
