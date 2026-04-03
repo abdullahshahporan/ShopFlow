@@ -69,7 +69,7 @@
                         <div class="sf-form-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
                     </div>
 
-                    <button type="submit" class="btn-sf-primary w-100" style="padding: 0.75rem; font-size: 1rem;">
+                    <button type="submit" class="sf-btn-primary w-100">
                         <i class="fas fa-check-circle"></i>
                         <span th:text="${accountType != null and accountType == 'SELLER'} ? 'Submit Seller Request' : 'Create Buyer Account'">Create Account</span>
                     </button>
@@ -81,7 +81,7 @@
                 </div>
 
                 <!-- Login Link -->
-                <a th:href="@{/login}" class="btn-sf-outline w-100" style="text-decoration: none; text-align: center;">
+                <a th:href="@{/login}" class="sf-btn-primary-outline w-100" style="text-align: center;">
                     <i class="fas fa-sign-in-alt"></i> Sign In
                 </a>
 

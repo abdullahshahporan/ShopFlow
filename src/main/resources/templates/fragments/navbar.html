@@ -72,10 +72,10 @@
             
             <!-- Not Authenticated -->
             <div sec:authorize="!isAuthenticated()" style="display: flex; gap: 0.75rem;">
-                <a th:href="@{/login}" class="btn-sf-outline" style="padding: 0.5rem 1.25rem; font-size: 0.875rem;">
+                <a th:href="@{/login}" class="sf-btn-primary-outline">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </a>
-                <a th:href="@{/register}" class="btn-sf-primary" style="padding: 0.5rem 1.25rem; font-size: 0.875rem; text-decoration: none;">
+                <a th:href="@{/register}" class="sf-btn-primary">
                     <i class="fas fa-user-plus"></i> Register
                 </a>
             </div>

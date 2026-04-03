@@ -495,7 +495,7 @@
                     <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}" 
                          th:src="${product.imageUrl}" 
                          th:alt="${product.name}"
-                         th:onerror="'this.onerror=null; this.src=\'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop\''">>
+                         th:onerror="'this.onerror=null; this.src=\'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop\''">
                     <img th:if="${product.imageUrl == null or product.imageUrl.isEmpty()}" 
                          th:src="'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop&q=80'"
                          th:alt="${product.name}">
@@ -823,5 +823,17 @@
             });
         });
     </script>
+
+    <!-- Floating Cart Button (Buyer only) -->
+    <div sec:authorize="hasRole('BUYER')" id="floating-cart-btn">
+        <a th:href="@{/buyer/cart}" class="sf-float-cart" title="View Cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="sf-float-cart-label">My Cart</span>
+            <span class="sf-float-cart-badge" id="home-cart-badge"
+                  th:text="${cartCount != null and cartCount > 0 ? cartCount : ''}"
+                  th:style="${cartCount != null and cartCount > 0 ? '' : 'display:none'}">
+            </span>
+        </a>
+    </div>
 </body>
 </html>

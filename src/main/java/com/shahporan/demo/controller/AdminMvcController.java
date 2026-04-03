@@ -37,6 +37,31 @@ public class AdminMvcController {
         return "admin/users";
     }
 
+    @GetMapping("/admin/sellers")
+    public String sellers(Model model) {
+        List<UserResponseDto> sellers = adminService.getAllSellers();
+        long pendingSellerCount = adminService.countPendingSellers();
+        long totalSellerCount = adminService.countSellers();
+        model.addAttribute("sellers", sellers);
+        model.addAttribute("pendingSellerCount", pendingSellerCount);
+        model.addAttribute("totalSellerCount", totalSellerCount);
+        return "admin/sellers";
+    }
+
+    @PostMapping("/admin/sellers/{id}/toggle")
+    public String toggleSeller(@PathVariable Long id,
+                               Authentication authentication,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            CustomUserDetails current = (CustomUserDetails) authentication.getPrincipal();
+            adminService.toggleUser(id, current.getId());
+            redirectAttributes.addFlashAttribute("successMessage", "Seller status updated successfully.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/sellers";
+    }
+
     @PostMapping("/admin/users/{id}/toggle")
     public String toggleUser(@PathVariable Long id,
                              Authentication authentication,

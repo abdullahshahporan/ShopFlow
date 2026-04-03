@@ -42,7 +42,6 @@ public class ProductService {
                 .name(dto.getName().trim())
                 .sku(dto.getSku().trim())
                 .price(dto.getPrice())
-                .quantity(dto.getQuantity())
                 .imageUrl(dto.getImageUrl() != null ? dto.getImageUrl().trim() : null)
                 .active(true)
                 .build();
@@ -51,7 +50,7 @@ public class ProductService {
         stockRepository.save(Stock.builder()
             .product(savedProduct)
             .seller(seller)
-            .quantity(savedProduct.getQuantity())
+            .quantity(dto.getQuantity())
             .build());
 
         return toResponse(savedProduct);
@@ -73,7 +72,6 @@ public class ProductService {
         product.setName(dto.getName().trim());
         product.setSku(dto.getSku().trim());
         product.setPrice(dto.getPrice());
-        product.setQuantity(dto.getQuantity());
         product.setImageUrl(dto.getImageUrl() != null ? dto.getImageUrl().trim() : null);
         if (dto.getActive() != null) {
             product.setActive(dto.getActive());
@@ -87,7 +85,7 @@ public class ProductService {
                 .quantity(0)
                 .build());
         stock.setSeller(updatedProduct.getSeller());
-        stock.setQuantity(updatedProduct.getQuantity());
+        stock.setQuantity(dto.getQuantity());
         stockRepository.save(stock);
 
         return toResponse(updatedProduct);

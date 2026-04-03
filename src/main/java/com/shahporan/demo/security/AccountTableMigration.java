@@ -121,7 +121,7 @@ public class AccountTableMigration implements CommandLineRunner {
 
         jdbcTemplate.update("""
                 INSERT INTO stock(product_id, seller_id, quantity, created_at, updated_at)
-                SELECT p.id, p.seller_id, COALESCE(p.quantity, 0), NOW(), NOW()
+                SELECT p.id, p.seller_id, 0, NOW(), NOW()
                 FROM products p
                 WHERE NOT EXISTS (
                     SELECT 1 FROM stock s WHERE s.product_id = p.id
