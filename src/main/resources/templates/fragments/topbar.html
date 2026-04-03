@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div class="topbar" th:fragment="topbar(title)">
+    <div class="topbar-title" th:text="${title}"></div>
+    <div class="topbar-actions">
+        <a href="#" class="btn btn-outline-primary btn-sm" style="visibility: hidden; width: 0; padding: 0; border: none;">
+            <i class="bi bi-bell"></i>
+        </a>
+    </div>
+</div>
+</body>
+</html>

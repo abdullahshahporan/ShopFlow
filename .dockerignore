@@ -1,0 +1,68 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# GitHub workflows
+.github
+
+# IDE files
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# Build directories
+target/
+build/
+out/
+bin/
+
+# Maven wrapper (optional - include in image for consistency)
+# .mvn/
+# mvnw
+# mvnw.cmd
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Test files
+src/test/
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.backup
+*.swp
+*.swo
+*~
+
+# Node modules (if any frontend build tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker files (not needed inside container)
+Dockerfile
+docker-compose*.yml
+.dockerignore
