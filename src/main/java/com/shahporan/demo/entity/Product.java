@@ -60,12 +60,21 @@ public class Product {
     @OneToOne(mappedBy = "product")
     private Stock stock;
 
+    public void setStock(Stock stock) {
+        this.stock = stock;
+        if (stock != null && stock.getProduct() != this) {
+            stock.setProduct(this);
+        }
+    }
+
     /**
      * Returns the current stock quantity tracked by the Stock table.
      * Product catalog info (name, price, SKU) lives here; quantity lives in Stock.
      */
     public Integer getQuantity() {
-        return stock != null ? stock.getQuantity() : 0;
+        Stock currentStock = getStock();
+        Integer quantity = currentStock != null ? currentStock.getQuantity() : null;
+        return quantity != null ? quantity : 0;
     }
 
     @PrePersist
