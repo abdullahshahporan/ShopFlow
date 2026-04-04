@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,7 @@ class AdminMvcControllerIntegrationTest {
 
     // INTEGRATION TEST 7
     @Test
-    @WithMockUser(username = "admin@shopflow.com", roles = {"ADMIN"})
+    @WithUserDetails("admin@demo.com")
     void adminUsersPage_asAdmin_loadsWithAllAttributes() throws Exception {
         mockMvc.perform(get("/admin/users"))
                 .andExpect(status().isOk())
@@ -78,6 +79,6 @@ class AdminMvcControllerIntegrationTest {
     void adminUsersPage_unauthenticated_redirectsToLogin() throws Exception {
         mockMvc.perform(get("/admin/users"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login"));
+                .andExpect(redirectedUrl("/login"));
     }
 }

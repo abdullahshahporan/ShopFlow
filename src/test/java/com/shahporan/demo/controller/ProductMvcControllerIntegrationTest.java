@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +53,7 @@ class ProductMvcControllerIntegrationTest {
 
     // INTEGRATION TEST 14
     @Test
-    @WithMockUser(username = "seller@test.com", roles = {"SELLER"})
+    @WithUserDetails("seller@demo.com")
     void sellerProductsPage_asSeller_loadsSuccessfully() throws Exception {
         mockMvc.perform(get("/seller/products"))
                 .andExpect(status().isOk())
@@ -62,11 +63,11 @@ class ProductMvcControllerIntegrationTest {
 
     // INTEGRATION TEST 15
     @Test
-    @WithMockUser(username = "seller@test.com", roles = {"SELLER"})
+    @WithUserDetails("seller@demo.com")
     void sellerProductFormPage_asSeller_loadsSuccessfully() throws Exception {
         mockMvc.perform(get("/seller/products/new"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("product"))
+                .andExpect(model().attributeExists("productRequestDto"))
                 .andExpect(view().name("seller/product-form"));
     }
 
