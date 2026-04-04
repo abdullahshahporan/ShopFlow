@@ -2,11 +2,13 @@ package com.shahporan.demo.service;
 
 import com.shahporan.demo.dto.ProductRequestDto;
 import com.shahporan.demo.dto.ProductResponseDto;
+import com.shahporan.demo.entity.Category;
 import com.shahporan.demo.entity.Product;
 import com.shahporan.demo.entity.Seller;
 import com.shahporan.demo.entity.Stock;
 import com.shahporan.demo.exception.BadRequestException;
 import com.shahporan.demo.exception.ResourceNotFoundException;
+import com.shahporan.demo.repository.CategoryRepository;
 import com.shahporan.demo.repository.ProductRepository;
 import com.shahporan.demo.repository.SellerRepository;
 import com.shahporan.demo.repository.StockRepository;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final SellerRepository sellerRepository;
     private final StockRepository stockRepository;
+    private final CategoryRepository categoryRepository;
 
     @Transactional
     public ProductResponseDto createProduct(ProductRequestDto dto, Long sellerId) {
@@ -146,5 +150,105 @@ public class ProductService {
                 .imageUrl(product.getImageUrl())
                 .createdAt(product.getCreatedAt())
                 .build();
+    }
+
+    /* ── Category Management Methods ── */
+
+    /**
+     * Add a category to a product.
+     */
+    @Transactional
+    public ProductResponseDto addCategoryToProduct(Long productId, Long categoryId, Long sellerId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        verifySellerOwnership(product, sellerId);
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+
+        if (!category.getActive()) {
+            throw new BadRequestException("Cannot add inactive category to product");
+        }
+
+        product.addCategory(category);
+        Product updatedProduct = productRepository.save(product);
+
+        return toResponse(updatedProduct);
+    }
+
+    /**
+     * Remove a category from a product.
+     */
+    @Transactional
+    public ProductResponseDto removeCategoryFromProduct(Long productId, Long categoryId, Long sellerId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        verifySellerOwnership(product, sellerId);
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+
+        product.removeCategory(category);
+        Product updatedProduct = productRepository.save(product);
+
+        return toResponse(updatedProduct);
+    }
+
+    /**
+     * Set multiple categories for a product at once (replaces existing).
+     */
+    @Transactional
+    public ProductResponseDto setProductCategories(Long productId, Set<Long> categoryIds, Long sellerId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        verifySellerOwnership(product, sellerId);
+
+        // Clear existing categories
+        product.getCategories().clear();
+
+        // Add new categories
+        if (categoryIds != null && !categoryIds.isEmpty()) {
+            for (Long categoryId : categoryIds) {
+                Category category = categoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+
+                if (!category.getActive()) {
+                    throw new BadRequestException("Cannot add inactive category (ID: " + categoryId + ") to product");
+                }
+
+                product.addCategory(category);
+            }
+        }
+
+        Product updatedProduct = productRepository.save(product);
+        return toResponse(updatedProduct);
+    }
+
+    /**
+     * Get all categories for a specific product.
+     */
+    @Transactional(readOnly = true)
+    public Set<Category> getProductCategories(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        return product.getCategories();
+    }
+
+    /**
+     * Get all products in a specific category.
+     */
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> getProductsByCategory(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+
+        return category.getProducts().stream()
+                .filter(product -> Boolean.TRUE.equals(product.getActive()))
+                .map(this::toResponse)
+                .toList();
     }
 }
