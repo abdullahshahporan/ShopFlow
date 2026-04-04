@@ -2,6 +2,8 @@ package com.shahporan.demo.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 //import com.shahporan.demo.entity.Seller;
 import jakarta.persistence.Column;
@@ -11,6 +13,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
@@ -60,11 +64,40 @@ public class Product {
     @OneToOne(mappedBy = "product")
     private Stock stock;
 
+    /**
+     * Many-to-Many: A product can belong to many categories,
+     * and a category can contain many products.
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "product_categories",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    @Builder.Default
+    private Set<Category> categories = new HashSet<>();
+
     public void setStock(Stock stock) {
         this.stock = stock;
         if (stock != null && stock.getProduct() != this) {
             stock.setProduct(this);
         }
+    }
+
+    /**
+     * Helper method to add a category to this product.
+     */
+    public void addCategory(Category category) {
+        this.categories.add(category);
+        category.getProducts().add(this);
+    }
+
+    /**
+     * Helper method to remove a category from this product.
+     */
+    public void removeCategory(Category category) {
+        this.categories.remove(category);
+        category.getProducts().remove(this);
     }
 
     /**

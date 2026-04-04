@@ -33,7 +33,7 @@ build/
 .vscode/
 
 ### Documentation Files ###
-*.md
+# *.md  # Commented out to allow README.md and other documentation
 *.txt
 *.pdf
 
