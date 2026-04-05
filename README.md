@@ -1433,7 +1433,7 @@ This project is licensed under the **MIT License**.
 ```
 MIT License
 
-Copyright (c) 2025 Shah Poran
+Copyright (c) 2026
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1458,17 +1458,7 @@ See [LICENSE](LICENSE) file for full license text.
 
 ---
 
-## 👨‍💻 Author
 
-<div align="center">
-
-**Shah Poran**
-
-[![GitHub](https://img.shields.io/badge/GitHub-shahporan-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/shahporan)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/shahporan)
-[![Email](https://img.shields.io/badge/Email-Contact-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:shah.poran@example.com)
-
-</div>
 
 ### Contributors
 
@@ -1507,6 +1497,6 @@ Thanks to all contributors who have helped improve ShopFlow!
 
 ---
 
-**© 2025 ShopFlow. All Rights Reserved.**
+**© 2026 ShopFlow. All Rights Reserved.**
 
 </div>
